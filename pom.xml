@@ -14,10 +14,17 @@
   <name>quant_server</name>
   <description>quant_server</description>
 
+  <!--  写子服务-->
+  <modules>
+    <module>eruka-server</module>
+  </modules>
+
   <packaging>pom</packaging>
 
   <properties>
     <java.version>1.8</java.version>
+    <!--集成springCloud，Spring Cloud 的版本通常与 Spring Boot 的版本紧密相关，需要确保兼容-->
+    <!--Finchley.RELEASE版本对应Spring Boot 2.0.3.RELEASE版本    -->
     <spring-cloud.version>Finchley.RELEASE</spring-cloud.version>
   </properties>
 
@@ -28,15 +35,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>cn.hutool</groupId>
       <artifactId>hutool-all</artifactId>
-      <version>5.8.25</version>
+      <version>4.3.1</version>
     </dependency>
   </dependencies>
   <dependencyManagement>
@@ -50,4 +51,18 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  <repositories>
+    <repository>
+      <id>maven-ali</id>
+      <url>https://maven.aliyun.com/repository/central</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>
