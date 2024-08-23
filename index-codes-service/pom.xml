@@ -7,8 +7,8 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>eruka-server</artifactId>
-    <name>eruka-server</name>
+    <artifactId>index-codes-service</artifactId>
+    <name>index-codes-service</name>
     <!-- jar打包可以默认不写-->
     <!-- <packaging>jar</packaging>-->
 
@@ -17,9 +17,20 @@
     </properties>
 
     <dependencies>
+        <!-- springboot web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- eureka-client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <!-- redis -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
     </dependencies>
 </project>

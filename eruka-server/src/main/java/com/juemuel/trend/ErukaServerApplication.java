@@ -5,9 +5,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
 import cn.hutool.core.util.NetUtil;
-
 @SpringBootApplication
 @EnableEurekaServer
+// http://127.0.0.1:8761/
 public class ErukaServerApplication {
 
     public static void main(String[] args) {
