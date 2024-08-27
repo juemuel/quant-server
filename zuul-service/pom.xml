@@ -7,15 +7,16 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>trend-trading-backtest-service</artifactId>
-    <name>trend-trading-backtest-service</name>
+    <artifactId>zuul-service</artifactId>
+    <name>index-zuul-service</name>
+    <!-- jar打包可以默认不写-->
+    <!-- <packaging>jar</packaging>-->
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-        <!-- springboot web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -25,16 +26,9 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
-        <!-- feign -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-            <version>2.0.0.RELEASE</version>
-        </dependency>
-        <!-- 断路器 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+            <artifactId>spring-cloud-starter-netflix-zuul</artifactId>
         </dependency>
     </dependencies>
 </project>

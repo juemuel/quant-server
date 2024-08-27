@@ -1,6 +1,7 @@
 package com.juemuel.trend.pojo;
 
 public class IndexData {
+
     String date;
     float closePoint;
     public String getDate() {
@@ -15,4 +16,5 @@ public class IndexData {
     public void setClosePoint(float closePoint) {
         this.closePoint = closePoint;
     }
+
 }
