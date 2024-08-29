@@ -14,10 +14,13 @@
     $(function(){
         var data4Vue = {
             ma: 20,
+            buyThreshold:1.01,
+            sellThreshold:0.99,
             startDate: null,
             endDate: null,
             activeIncomeTab: 'first',
             activeProfitTab: 'first',
+            serviceCharge:0.0,
             // 1. 指数集合
             indexes: [],
             // 2. 当前指数
@@ -31,6 +34,8 @@
             // 3. 收益数据
             profits:[],
             profitValues:[],
+            maDatas:[],
+            maValues:[],
             // 4. 交易数据
             trades:[],
             // 5. 收益小结
@@ -75,14 +80,16 @@
                 // 接口获取回测数据
                 simulate:function(){
 
-                    var url =  "http://127.0.0.1:8031/api-backtest/simulate/"+vue.currentIndex+"/"+vue.ma+"/"+vue.startDate+"/"+vue.endDate+"/";
+                    var url =  "http://127.0.0.1:8031/api-backtest/simulate/"+vue.currentIndex+"/"+vue.ma+"/"+vue.buyThreshold+"/"+vue.sellThreshold+"/" +vue.serviceCharge +"/"+vue.startDate+"/"+vue.endDate+"/";
                     axios.get(url).then(function(response) {
                         //清空原数据
                         vue.indexDatas = [];
                         vue.closePoints = [];
                         vue.dates = [];
-                        vue.profits = [];
-                        vue.profitValues =[];
+                        vue.profits = []; // 收益
+                        vue.profitValues =[]; // 收益数值
+                        vue.maDatas =[]; // 均线
+                        vue.maValues = [] // 均线数值
                         vue.trades = [];
                         vue.annualProfits = [];
                         vue.annuals = [];
@@ -96,6 +103,7 @@
                         vue.indexEndDate = response.data.indexEndDate;
                         //收益
                         vue.profits = response.data.profits;
+                        vue.maDatas = response.data.maDatas;
                         //交易
                         vue.trades = response.data.trades;
                         // 收益统计
@@ -117,6 +125,8 @@
                             vue.closePoints.push(indexData.closePoint);
                             var profit = vue.profits[i];
                             vue.profitValues.push(profit.value);
+                            var ma = vue.maDatas[i]
+                            vue.maValues.push(ma.value)
                         }
                         // 计算收益横纵
                         for(i in vue.annualProfits){
@@ -126,9 +136,10 @@
                         }
                         //收益图表
                         chart4Profit.config.data.labels = vue.dates;
-                        chart4Profit.config.data.datasets[0].label = vue.currentIndex;
+                        chart4Profit.config.data.datasets[0].label = vue.currentIndex; // 指数数据
                         chart4Profit.config.data.datasets[0].data = vue.closePoints;
-                        chart4Profit.config.data.datasets[1].data = vue.profitValues;
+                        chart4Profit.config.data.datasets[1].data = vue.profitValues; // 趋势数据
+                        chart4Profit.config.data.datasets[2].data = vue.maValues; // 趋势数据
                         chart4Profit.update();
 
                         chart4AnnualIncome.config.data.labels = vue.annuals;
@@ -136,7 +147,7 @@
                         chart4AnnualIncome.config.data.datasets[0].data = vue.indexIncomes;
                         chart4AnnualIncome.config.data.datasets[1].data = vue.trendIncomes;
                         chart4AnnualIncome.update();
-                        console.log('simulate')
+                        console.log('simulate', response)
                         if(vue.flushDate){
                             vue.updateDate();
                         }
@@ -257,6 +268,17 @@
                         pointRadius: 0,
                         fill: false,
                         lineTension: 0,
+                    },
+                    {
+                        label: '均线',
+                        data: [], // 示例均线数据
+                        borderColor: '#00FF00',
+                        backgroundColor: '#00FF00',
+                        borderWidth: 1.2,
+                        pointRadius: 0,
+                        fill: false,
+                        lineTension: 0,
+                        dash: [5, 5] // 可选：虚线样式
                     }
                 ]
             },
@@ -398,11 +420,48 @@
                 </span>
             </td>
             <td>
-                <select class="form-control" @change="changeParam" v-model="ma">
+                <select class="form-control" @change="changeParam"  @click="simulate" v-model="ma">
                     <option  value="5">5日</option>
                     <option  value="10">10日</option>
                     <option  value="20">20日</option>
                     <option  value="60">60日</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span data-toggle="tooltip" data-placement="top" title="每一笔交易都会有手续费，一般说来手续费都不高，千分之 1.5 的左右，默认是没有计算手续费的">
+                    手续费:<span class="glyphicon glyphicon-question-sign	" > </span>
+                </span>
+            </td>
+            <td>
+                <select class="form-control" @change="changeParam"  v-model="serviceCharge">
+                    <option value="0">无</option>
+                    <option value="0.001">0.1%</option>
+                    <option value="0.0015">0.15%</option>
+                    <option value="0.002">0.2%</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span data-toggle="tooltip" data-placement="top" title="当前值大于均线，说明上升趋势来了，就可以购买，或者再稍等等，比均线多 5% 再下手，那么购买阈值就是 1.05 ">
+                    购买阈值:<span class="glyphicon glyphicon-question-sign	" > </span>
+                </span>
+            </td>
+            <td>
+                <select class="form-control" @change="changeParam"  @click="simulate"  v-model="buyThreshold">
+                    <option  v-for="i in 9" :value="i/100+1">{{i/100+1|formatNumberFilter(2)}}</option>
+                </select>
+            </td>
+            <td>
+                <span data-toggle="tooltip" data-placement="top" title="当前值低于均线，说明下跌趋势来了，就可以出售，或者再稍等等，比最近的高点低 5%，那么购买阈值就是 0.95">
+                    出售阈值:<span class="glyphicon glyphicon-question-sign	" > </span>
+                </span>
+            </td>
+            <td>
+                <select class="form-control" @change="changeParam"  @click="simulate"  v-model="sellThreshold">
+                    <option v-for="i in 10" :value="1-i/100">{{1-i/100|formatNumberFilter(2)}}</option>
                 </select>
             </td>
         </tr>

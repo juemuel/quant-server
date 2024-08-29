@@ -2,10 +2,7 @@ package com.juemuel.trend.controller;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import com.juemuel.trend.pojo.IndexData;
-import com.juemuel.trend.pojo.Profit;
-import com.juemuel.trend.pojo.Trade;
-import com.juemuel.trend.pojo.AnnualProfit;
+import com.juemuel.trend.pojo.*;
 import com.juemuel.trend.service.BackTestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,11 +16,14 @@ import java.util.*;
 public class BackTestController {
     @Autowired BackTestService backTestService;
 
-    @GetMapping("/simulate/{code}/{ma}/{startDate}/{endDate}")
+    @GetMapping("/simulate/{code}/{ma}/{buyThreshold}/{sellThreshold}/{serviceCharge}/{startDate}/{endDate}")
     @CrossOrigin
     public Map<String,Object> backTest(
             @PathVariable("code") String code
             ,@PathVariable("ma") int ma
+            ,@PathVariable("buyThreshold") float buyThreshold
+            ,@PathVariable("sellThreshold") float sellThreshold
+            ,@PathVariable("serviceCharge") float serviceCharge
             ,@PathVariable("startDate") String strStartDate
             ,@PathVariable("endDate") String strEndDate
     ) throws Exception {
@@ -31,17 +31,13 @@ public class BackTestController {
 
         String indexStartDate = allIndexDatas.get(0).getDate();
         String indexEndDate = allIndexDatas.get(allIndexDatas.size()-1).getDate();
-        System.out.println(indexStartDate + indexEndDate);
-
         allIndexDatas = filterByDateRange(allIndexDatas,strStartDate, strEndDate);
-        System.out.println("allIndexDatas " + allIndexDatas.toString());
         float sellRate = 0.95f;
         float buyRate = 1.05f;
-        float serviceCharge = 0f;
         Map<String,?> simulateResult= backTestService.simulate(ma,sellRate, buyRate,serviceCharge, allIndexDatas);
         List<Profit> profits = (List<Profit>) simulateResult.get("profits");
         List<Trade> trades = (List<Trade>) simulateResult.get("trades");
-
+        List<MaData> maDatas = (List<MaData>) simulateResult.get("maDatas");
         float years = backTestService.getYear(allIndexDatas);
         float indexIncomeTotal = (allIndexDatas.get(allIndexDatas.size()-1).getClosePoint() - allIndexDatas.get(0).getClosePoint()) / allIndexDatas.get(0).getClosePoint();
         float indexIncomeAnnual = (float) Math.pow(1+indexIncomeTotal, 1/years) - 1;
@@ -61,6 +57,7 @@ public class BackTestController {
         result.put("indexEndDate", indexEndDate);
         result.put("profits", profits);
         result.put("trades", trades);
+        result.put("maDatas", maDatas);
 
         result.put("years", years);
         result.put("indexIncomeTotal", indexIncomeTotal);

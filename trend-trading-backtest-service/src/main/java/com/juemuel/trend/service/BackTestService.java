@@ -5,10 +5,7 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.juemuel.trend.client.IndexDataClient;
-import com.juemuel.trend.pojo.AnnualProfit;
-import com.juemuel.trend.pojo.IndexData;
-import com.juemuel.trend.pojo.Profit;
-import com.juemuel.trend.pojo.Trade;
+import com.juemuel.trend.pojo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +30,7 @@ public class BackTestService {
         // 初始化利润和交易列表
         List<Profit> profits =new ArrayList<>();
         List<Trade> trades = new ArrayList<>();
+        List<MaData> maDatas = new ArrayList<>(); // 存储 MA 均线数据
         // 初始现金
         float initCash = 1000;
         float cash = initCash;
@@ -50,6 +48,7 @@ public class BackTestService {
         float init =0; // 初始化收盘价
         if(!indexDatas.isEmpty())
             init = indexDatas.get(0).getClosePoint();
+
         for (int i = 0; i<indexDatas.size() ; i++) {
             IndexData indexData = indexDatas.get(i);
             float closePoint = indexData.getClosePoint();
@@ -115,6 +114,9 @@ public class BackTestService {
             profit.setDate(indexData.getDate());
             profit.setValue(rate*init);
             profits.add(profit);
+            // 添加 MA 值
+            MaData maData = new MaData(indexData.getDate(), avg);
+            maDatas.add(maData);
         }
         // 计算平均赢利率和平均亏损率、年收益
         avgWinRate = winCount > 0 ? totalWinRate / winCount : 0;
@@ -125,6 +127,7 @@ public class BackTestService {
         Map<String, Object> map = new HashMap<>();
         map.put("profits", profits);
         map.put("trades", trades);
+        map.put("maDatas", maDatas); // 添加 MA 值
         map.put("winCount", winCount);
         map.put("lossCount", lossCount);
         map.put("avgWinRate", avgWinRate);
@@ -180,32 +183,6 @@ public class BackTestService {
         }
         return (last.getClosePoint() - first.getClosePoint()) / first.getClosePoint();
     }
-
-    /**
-     * 计算完整时间范围内，每一年的指数投资收益和趋势投资收益
-     * @param indexDatas
-     * @param profits
-     * @return
-     */
-    private List<AnnualProfit> caculateAnnualProfits(List<IndexData> indexDatas, List<Profit> profits) {
-        List<AnnualProfit> result = new ArrayList<>();
-        String strStartDate = indexDatas.get(0).getDate();
-        String strEndDate = indexDatas.get(indexDatas.size()-1).getDate();
-        Date startDate = DateUtil.parse(strStartDate);
-        Date endDate = DateUtil.parse(strEndDate);
-        int startYear = DateUtil.year(startDate);
-        int endYear = DateUtil.year(endDate);
-        for (int year =startYear; year <= endYear; year++) {
-            AnnualProfit annualProfit = new AnnualProfit();
-            annualProfit.setYear(year);
-            float indexIncome = getIndexIncome(year,indexDatas);
-            float trendIncome = getTrendIncome(year,profits);
-            annualProfit.setIndexIncome(indexIncome);
-            annualProfit.setTrendIncome(trendIncome);
-            result.add(annualProfit);
-        }
-        return result;
-    }
     /**
      * 获取一年的趋势投资收益
      * @param year
@@ -250,6 +227,32 @@ public class BackTestService {
         }
         avg = sum / (now - start);
         return avg;
+    }
+
+    /**
+     * 计算完整时间范围内，每年的指数投资年收益和趋势投资年收益
+     * @param indexDatas
+     * @param profits
+     * @return
+     */
+    private List<AnnualProfit> caculateAnnualProfits(List<IndexData> indexDatas, List<Profit> profits) {
+        List<AnnualProfit> result = new ArrayList<>();
+        String strStartDate = indexDatas.get(0).getDate();
+        String strEndDate = indexDatas.get(indexDatas.size()-1).getDate();
+        Date startDate = DateUtil.parse(strStartDate);
+        Date endDate = DateUtil.parse(strEndDate);
+        int startYear = DateUtil.year(startDate);
+        int endYear = DateUtil.year(endDate);
+        for (int year =startYear; year <= endYear; year++) {
+            AnnualProfit annualProfit = new AnnualProfit();
+            annualProfit.setYear(year);
+            float indexIncome = getIndexIncome(year,indexDatas);
+            float trendIncome = getTrendIncome(year,profits);
+            annualProfit.setIndexIncome(indexIncome);
+            annualProfit.setTrendIncome(trendIncome);
+            result.add(annualProfit);
+        }
+        return result;
     }
 
     /**
