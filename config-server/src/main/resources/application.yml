@@ -3,11 +3,12 @@ spring:
     name: config-server
   cloud:
     config:
-      label: master
       server:
         git:
-          uri: https://github.com/juemuel/quant-server/
-          searchPaths: respo
+          uri: https://github.com/juemuel/server-config.git
+          default-label: main
+          search-paths: java
+          skip-ssl-validation: true
 eureka:
   client:
     serviceUrl:
