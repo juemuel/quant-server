@@ -69,7 +69,7 @@
                 // 初始化函数
                 init:function(){
                     console.log('init')
-                    var url =  "http://127.0.0.1:8031/api-codes/codes";
+                    var url =  "http://127.0.0.1:8031/api/index-codes/getCodes";
                     axios.get(url).then(function(response) {
                         vue.indexes = response.data;
                         vue.$nextTick(function(){
@@ -80,7 +80,7 @@
                 // 接口获取回测数据
                 simulate:function(){
 
-                    var url =  "http://127.0.0.1:8031/api-backtest/simulate/"+vue.currentIndex+"/"+vue.ma+"/"+vue.buyThreshold+"/"+vue.sellThreshold+"/" +vue.serviceCharge +"/"+vue.startDate+"/"+vue.endDate+"/";
+                    var url =  "http://127.0.0.1:8031/api/backtest/simulate/"+vue.currentIndex+"/"+vue.ma+"/"+vue.buyThreshold+"/"+vue.sellThreshold+"/" +vue.serviceCharge +"/"+vue.startDate+"/"+vue.endDate+"/";
                     axios.get(url).then(function(response) {
                         //清空原数据
                         vue.indexDatas = [];

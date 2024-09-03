@@ -6,13 +6,14 @@ spring:
   application:
     name: index-zuul-service
 zuul:
+  prefix: /api
   routes:
-    api-a:
-      path: /api-codes/**
+    index-codes:
+      path: /index-codes/**
       serviceId: INDEX-CODES-SERVICE
-    api-b:
-      path: /api-backtest/**
+    back-test-service:
+      path: /backtest/**
       serviceId: TREND-TRADING-BACKTEST-SERVICE
-    api-c:
-      path: /api-view/**
+    back-test-view:
+      path: /backtest-view/**
       serviceId: TREND-TRADING-BACKTEST-VIEW

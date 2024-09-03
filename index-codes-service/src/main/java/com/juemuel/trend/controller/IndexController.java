@@ -18,11 +18,11 @@ public class IndexController {
     @Autowired
     IpConfig ipConfiguration;
 //  注解：允许跨域
-//  http://127.0.0.1:8011/codes
+//  http://127.0.0.1:8011/getCodes
 
-    @GetMapping("/codes")
+    @GetMapping("/getCodes")
     @CrossOrigin
-    public List<Index> codes() throws Exception {
+    public List<Index> getCodes() throws Exception {
         System.out.println("current instance's port is "+ ipConfiguration.getPort());
         return indexService.get();
     }

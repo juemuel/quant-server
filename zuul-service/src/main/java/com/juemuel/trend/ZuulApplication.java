@@ -12,7 +12,6 @@ import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 @EnableEurekaClient
 @EnableDiscoveryClient
 public class ZuulApplication {
-    //  http://127.0.0.1:8031/api-codes/codes
     public static void main(String[] args) {
         int port = 8031;
         if(!NetUtil.isUsableLocalPort(port)) {
