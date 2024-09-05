@@ -25,6 +25,7 @@
     <module>trend-trading-backtest-service</module>
       <module>trend-trading-backtest-view</module>
       <module>config-server</module>
+      <module>common-user-service</module>
   </modules>
 
   <packaging>pom</packaging>
@@ -33,6 +34,7 @@
     <java.version>1.8</java.version>
     <!--集成springCloud，Spring Cloud 的版本通常与 Spring Boot 的版本紧密相关，需要确保兼容-->
     <!--Finchley.RELEASE版本对应Spring Boot 2.0.3.RELEASE版本    -->
+    <!--Greenwich.SR3版本对应Spring Boot 2.1.6.RELEASE版本    -->
     <spring-cloud.version>Finchley.RELEASE</spring-cloud.version>
   </properties>
 

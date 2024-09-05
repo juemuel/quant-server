@@ -1,12 +1,16 @@
+# 微服务的名字
+spring:
+  application:
+    name: eureka-server
+# 微服务的端口号（显性地写在入口程序中了）
+# server:
+#    port: 8761
 eureka:
   instance:
     hostname: localhost # 表示主机名称
   client:
-    registerWithEureka: false # 是否注册到服务器
-    fetchRegistry: false # 是否获取服务器注册列表
+    registerWithEureka: false # 是否注册到服务器，一般不注册自己到服务器
+    fetchRegistry: false # 是否获取服务器注册列表，一般屏蔽掉注册信息
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/ #域名地址
 
-spring:
-  application:
-    name: eureka-server # 微服务名称

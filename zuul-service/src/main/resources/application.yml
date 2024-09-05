@@ -17,3 +17,6 @@ zuul:
     back-test-view:
       path: /backtest-view/**
       serviceId: TREND-TRADING-BACKTEST-VIEW
+    common-user-service:
+      path: /common-user/**
+      service-id: COMMON-USER-SERVICE
