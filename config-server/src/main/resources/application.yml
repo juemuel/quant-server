@@ -3,12 +3,14 @@ spring:
     name: config-server
   cloud:
     config:
-      server:
+      server: # 可以设置保存git、svn或本地
         git:
           uri: https://github.com/juemuel/server-config.git
           default-label: main
           search-paths: java
           skip-ssl-validation: true
+        native: # 同步git仓库的配置文件到本地
+          search-locations: classpath:/shared
 eureka:
   client:
     serviceUrl:

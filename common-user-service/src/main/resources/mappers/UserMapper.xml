@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--DAO的路径-->
+<mapper namespace="com.juemuel.trend.dao.UserDAO">
+    <!--实体类路径-->
+    <resultMap id="BaseUserMap" type="com.juemuel.trend.pojo.User">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="username" jdbcType="VARCHAR" property="userName" />
+        <result column="password" jdbcType="VARCHAR" property="passWord" />
+    </resultMap>
+
+    <!--登录查询-->
+    <select id="loginSel" resultType="com.juemuel.trend.pojo.User">
+        select * from user where username = #{userName} and password = #{passWord}
+    </select>
+
+</mapper>
