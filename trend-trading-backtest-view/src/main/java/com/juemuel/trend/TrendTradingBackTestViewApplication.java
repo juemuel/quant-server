@@ -5,6 +5,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -21,6 +22,8 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 @EnableEurekaClient
 public class TrendTradingBackTestViewApplication {
+    @Value("${version}")
+    private String version;
     public static void main(String[] args) {
         int port = 0;
         int defaultPort = 8041;
@@ -75,5 +78,13 @@ public class TrendTradingBackTestViewApplication {
         }
         new SpringApplicationBuilder(TrendTradingBackTestViewApplication.class).properties("server.port=" + port).run(args);
 
+    }
+    @Bean
+    public CommandLineRunner commandLineRunner(ApplicationContext context) {
+        return args -> {
+            System.out.println("value: " + version);
+            String version = context.getEnvironment().getProperty("version");
+            System.out.println("value: " + version);
+        };
     }
 }

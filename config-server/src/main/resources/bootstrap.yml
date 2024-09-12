@@ -1,21 +1,48 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
 spring:
+  profiles:
+    active: dev
+---
+spring:
+  profiles: dev
+  application:
+    name: config-server
+  cloud:
+    config:
+      profile: dev
+      server: # 可以设置保存git、svn或本地
+        git: # 使用git，可以通过http://localhost:8060/trend-trading-backtest-view/dev/main
+          uri: https://github.com/juemuel/server-config.git
+          default-label: main
+          search-paths: java
+          skip-ssl-validation: true
+          proxy:
+            https:
+              host: 127.0.0.1
+              port: 10809
+---
+spring:
+  profiles: prod
   application:
     name: config-server
   #  profiles: # 使用本地
   #    active: native
   cloud:
     config:
+      profile: prod
       server: # 可以设置保存git、svn或本地
         #        native: # 本地保存位置
         #          search-locations: classpath:/java
-        git: # 使用git，失败propertySources 为空
+        git: # 使用git，可以通过http://localhost:8060/trend-trading-backtest-view/prod/main
           uri: https://github.com/juemuel/server-config.git
           default-label: main
           search-paths: java
-          username: 799525644@qq.com
-          password: jue1029github
           skip-ssl-validation: true
-  eureka:
-    client:
-      serviceUrl:
-        defaultZone: http://localhost:8761/eureka/
+          proxy:
+            https:
+              host: 127.0.0.1
+              port: 10809
+

@@ -2,11 +2,11 @@ spring:
   application:
     name: trend-trading-backtest-view
   thymeleaf:
+    cache: false
     mode: LEGACYHTML5
     encoding: UTF-8
     servlet:
       content-type: text/html
-    cache: false
 #  cloud:
 #    config: # 如果显性配置spring.cloud.name，则不会读取配置中心默认的配置文件
 #      discovery:
@@ -15,10 +15,6 @@ spring:
 #      profile: dev
 #      name: trend-trading-backtest-view
 #      label: master
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
 # 配置中心客户端使用actuator时
 management:
   endpoint:
