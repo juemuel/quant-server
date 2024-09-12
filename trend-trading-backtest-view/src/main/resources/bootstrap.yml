@@ -14,7 +14,7 @@ spring:
     config:
       label: main
       profile: dev
-#      uri: http://localhost:8060 # uri方式或用服务方式
+#      uri: http://localhost:8060 # uri方式或用eruka的服务方式
       discovery:
         enabled: true
         serviceId: config-server
@@ -27,7 +27,7 @@ spring:
     config:
       label: main
       profile: prod
-#      uri: http://localhost:8060 # uri方式或用服务方式
+#      uri: http://localhost:8060 # uri方式或用eruka的服务方式
       discovery:
         enabled: true
         serviceId: config-server
