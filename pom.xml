@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.0.3.RELEASE</version>
+    <version>2.2.6.RELEASE</version>
     <relativePath/>
   </parent>
 
@@ -35,7 +35,8 @@
     <!--集成springCloud，Spring Cloud 的版本通常与 Spring Boot 的版本紧密相关，需要确保兼容-->
     <!--Finchley.RELEASE版本对应Spring Boot 2.0.3.RELEASE版本    -->
     <!--Greenwich.SR3版本对应Spring Boot 2.1.6.RELEASE版本    -->
-    <spring-cloud.version>Finchley.RELEASE</spring-cloud.version>
+    <!--Hoxton.SR6版本对应 Spring Boot 2.2.6.RELEASE版本-->
+    <spring-cloud.version>Hoxton.SR6</spring-cloud.version>
   </properties>
 
   <dependencies>
@@ -69,18 +70,6 @@
         <groupId>org.mybatis.spring.boot</groupId>
         <artifactId>mybatis-spring-boot-starter</artifactId>
         <version>2.1.0</version>
-      </dependency>
-      <!-- 配置中心 -->
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-config-server</artifactId>
-        <version>2.1.4.RELEASE</version>
-      </dependency>
-      <!--config 客户端-->
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-config</artifactId>
-        <version>2.1.4.RELEASE</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

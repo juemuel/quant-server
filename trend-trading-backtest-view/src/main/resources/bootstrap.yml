@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    active: dev
+---
+spring:
+  profiles: prod
+  application:
+    name: trend-trading-backtest-view
+  cloud:
+    config:
+      uri: http://localhost:8060
+      label: main
+      profile: prod
+---
+spring:
+  profiles: dev
+  application:
+    name: trend-trading-backtest-view
+  cloud:
+    config:
+      uri: http://localhost:8060
+      label: main
+      profile: dev
