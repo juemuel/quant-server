@@ -84,7 +84,6 @@ public class BackTestController {
     private List<IndexData> filterByDateRange(List<IndexData> allIndexDatas, String strStartDate, String strEndDate) {
         if(StrUtil.isBlankOrUndefined(strStartDate) || StrUtil.isBlankOrUndefined(strEndDate) )
             return allIndexDatas;
-
         List<IndexData> result = new ArrayList<>();
         Date startDate = DateUtil.parse(strStartDate);
         Date endDate = DateUtil.parse(strEndDate);

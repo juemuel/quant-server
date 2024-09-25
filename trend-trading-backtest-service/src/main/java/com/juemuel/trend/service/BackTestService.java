@@ -246,6 +246,7 @@ public class BackTestService {
         for (int year =startYear; year <= endYear; year++) {
             AnnualProfit annualProfit = new AnnualProfit();
             annualProfit.setYear(year);
+            System.out.println(year + ":"+indexDatas);
             float indexIncome = getIndexIncome(year,indexDatas);
             float trendIncome = getTrendIncome(year,profits);
             annualProfit.setIndexIncome(indexIncome);
