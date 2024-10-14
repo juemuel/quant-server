@@ -30,7 +30,7 @@ public class BackTestService {
         // 初始化利润和交易列表
         List<Profit> profits =new ArrayList<>();
         List<Trade> trades = new ArrayList<>();
-        List<MaData> maDatas = new ArrayList<>(); // 存储 MA 均线数据
+        List<MaData> allMaDatas = new ArrayList<>();
         // 初始现金
         float initCash = 1000;
         float cash = initCash;
@@ -48,12 +48,19 @@ public class BackTestService {
         float init =0; // 初始化收盘价
         if(!indexDatas.isEmpty())
             init = indexDatas.get(0).getClosePoint();
-
+        // 计算多个移动平均线
+        List<List<Float>> maLists = calculateMultipleMAs(indexDatas, Arrays.asList(10, 20, 30, 50, 100));
         for (int i = 0; i<indexDatas.size() ; i++) {
+            // 获取当天的多个移动平均线值
+            List<Float> mAs = new ArrayList<>();
+            for (int j = 0; j < maLists.size(); j++) {
+                mAs.add(maLists.get(j).get(i));
+            }
+
             IndexData indexData = indexDatas.get(i);
             float closePoint = indexData.getClosePoint();
-            float avg = getMA(i, ma, indexDatas);  // 计算移动平均线
-            float max = getMax(i, ma, indexDatas);  // 计算最大值
+            float avg = getMA(i, ma, indexDatas);  // 根据传入的ma，计算算法参考的移动平均线
+            float max = getMax(i, ma, indexDatas);  // 根据传入的ma，计算算法参考的最大值
             float increase_rate = closePoint / avg;  // 上涨比例
             float decrease_rate = closePoint / max;  // 下跌比例
             // 操作逻辑
@@ -114,9 +121,10 @@ public class BackTestService {
             profit.setDate(indexData.getDate());
             profit.setValue(rate*init);
             profits.add(profit);
-            // 添加 MA 值
-            MaData maData = new MaData(indexData.getDate(), avg);
-            maDatas.add(maData);
+            // 添加 选择的MA值 到 选择MA数组中
+            List<Float> maValues = mAs;
+            MaData maData = new MaData(indexData.getDate(), maValues);
+            allMaDatas.add(maData);
         }
         // 计算平均赢利率和平均亏损率、年收益
         avgWinRate = winCount > 0 ? totalWinRate / winCount : 0;
@@ -127,41 +135,43 @@ public class BackTestService {
         Map<String, Object> map = new HashMap<>();
         map.put("profits", profits);
         map.put("trades", trades);
-        map.put("maDatas", maDatas); // 添加 MA 值
         map.put("winCount", winCount);
         map.put("lossCount", lossCount);
         map.put("avgWinRate", avgWinRate);
         map.put("avgLossRate", avgLossRate);
         map.put("annualProfits", annualProfits);
+        map.put("allMaDatas", allMaDatas);
         return map;
     }
-
+    private List<List<Float>> calculateMultipleMAs(List<IndexData> indexDatas, List<Integer> maPeriods) {
+        List<List<Float>> maLists = new ArrayList<>();
+        for (int period : maPeriods) {
+            List<Float> maList = new ArrayList<>();
+            for (int i = 0; i < indexDatas.size(); i++) {
+                float ma = getMA(i, period, indexDatas);
+                maList.add(ma);
+            }
+            maLists.add(maList);
+        }
+        return maLists;
+    }
     /**
      * 计算日期范围内，指数的最大值
-     * @param i
-     * @param day
-     * @param list
+     * @param currentIndex
+     * @param ma
+     * @param indexDatas
      * @return
      */
-    private static float getMax(int i, int day, List<IndexData> list) {
-        int start = i-1-day;
-        if(start<0)
-            start = 0;
-        int now = i-1;
-
-        if(start<0)
+    private float getMax(int currentIndex, int ma, List<IndexData> indexDatas) {
+        if (currentIndex < ma - 1) {
             return 0;
-
-        float max = 0;
-        for (int j = start; j < now; j++) {
-            IndexData bean =list.get(j);
-            if(bean.getClosePoint()>max) {
-                max = bean.getClosePoint();
-            }
+        }
+        float max = Float.MIN_VALUE;
+        for (int i = currentIndex - ma + 1; i <= currentIndex; i++) {
+            max = Math.max(max, indexDatas.get(i).getClosePoint());
         }
         return max;
     }
-
     /**
      * 获取一年的指数投资收益
      * @param year
@@ -207,26 +217,20 @@ public class BackTestService {
     }
     /**
      * 计算MA
-     * @param i
+     * @param currentIndex
      * @param ma
-     * @param list
+     * @param indexDatas
      * @return
      */
-    private static float getMA(int i, int ma, List<IndexData> list) {
-        int start = i-1-ma;
-        int now = i-1;
-
-        if(start<0)
+    private float getMA(int currentIndex, int ma, List<IndexData> indexDatas) {
+        if (currentIndex < ma - 1) {
             return 0;
-
-        float sum = 0;
-        float avg = 0;
-        for (int j = start; j < now; j++) {
-            IndexData bean =list.get(j);
-            sum += bean.getClosePoint();
         }
-        avg = sum / (now - start);
-        return avg;
+        float sum = 0;
+        for (int i = currentIndex - ma + 1; i <= currentIndex; i++) {
+            sum += indexDatas.get(i).getClosePoint();
+        }
+        return sum / ma;
     }
 
     /**

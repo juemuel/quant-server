@@ -1,9 +1,12 @@
 package com.juemuel.trend.pojo;
 
+import java.util.Collections;
+import java.util.List;
+
 public class MaData {
     private String date;
-    private float value;
-    public MaData(String date, float value) {
+    private List<Float> value;
+    public MaData(String date, List<Float> value) {
         this.date = date;
         this.value = value;
     }
@@ -13,11 +16,11 @@ public class MaData {
     public void setDate(String date) {
         this.date = date;
     }
-    public float getValue() {
+    public List<Float> getValue() {
         return value;
     }
     public void setValue(float value) {
-        this.value = value;
+        this.value = Collections.singletonList(value);
     }
     @Override
     public String toString() {

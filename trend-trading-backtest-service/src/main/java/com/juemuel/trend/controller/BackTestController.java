@@ -37,7 +37,7 @@ public class BackTestController {
         Map<String,?> simulateResult= backTestService.simulate(ma,sellRate, buyRate,serviceCharge, allIndexDatas);
         List<Profit> profits = (List<Profit>) simulateResult.get("profits");
         List<Trade> trades = (List<Trade>) simulateResult.get("trades");
-        List<MaData> maDatas = (List<MaData>) simulateResult.get("maDatas");
+        List<MaData> maDatas = (List<MaData>) simulateResult.get("allMaDatas");
         float years = backTestService.getYear(allIndexDatas);
         float indexIncomeTotal = (allIndexDatas.get(allIndexDatas.size()-1).getClosePoint() - allIndexDatas.get(0).getClosePoint()) / allIndexDatas.get(0).getClosePoint();
         float indexIncomeAnnual = (float) Math.pow(1+indexIncomeTotal, 1/years) - 1;
@@ -52,25 +52,26 @@ public class BackTestController {
         List<AnnualProfit> annualProfits = (List<AnnualProfit>) simulateResult.get("annualProfits");
 
         Map<String,Object> result = new HashMap<>();
+        // 指数、均线、本身收益
         result.put("indexDatas", allIndexDatas);
         result.put("indexStartDate", indexStartDate);
         result.put("indexEndDate", indexEndDate);
         result.put("profits", profits);
-        result.put("trades", trades);
         result.put("maDatas", maDatas);
-
-        result.put("years", years);
-        result.put("indexIncomeTotal", indexIncomeTotal);
-        result.put("indexIncomeAnnual", indexIncomeAnnual);
-        result.put("trendIncomeTotal", trendIncomeTotal);
-        result.put("trendIncomeAnnual", trendIncomeAnnual);
-
-        result.put("winCount", winCount);
-        result.put("lossCount", lossCount);
-        result.put("avgWinRate", avgWinRate);
-        result.put("avgLossRate", avgLossRate);
-
+        // 收益数据
         result.put("annualProfits", annualProfits);
+        result.put("years", years);
+        List<Map<String, Object>> incomeStastics = Arrays.asList(
+            createIncomeStasticsItem(years, "指数收益", indexIncomeTotal, indexIncomeAnnual),
+            createIncomeStasticsItem(years,"趋势收益", trendIncomeTotal, trendIncomeAnnual)
+        );
+        result.put("incomeStastics", incomeStastics);
+        // 交易数据
+        result.put("trades", trades);
+        List<Map<String, Object>> tradeStastics = Arrays.asList(
+            createTradeStasticsItem("趋势交易", winCount, lossCount, avgWinRate, avgLossRate)
+        );
+        result.put("tradeStastics", tradeStastics);
         return result;
     }
 
@@ -98,5 +99,41 @@ public class BackTestController {
             }
         }
         return result;
+    }
+
+    /**
+     * 创建收益小结数组对象
+     * @param years
+     * @param title
+     * @param total
+     * @param annual
+     * @return
+     */
+    private static Map<String, Object> createIncomeStasticsItem(Float years, String title, Float total, Float annual) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("years", years);
+        data.put("title", title);
+        data.put("incomeTotal", total);
+        data.put("incomeAnnual", annual);
+        return data;
+    }
+
+    /**
+     * 创建交易小结数组对象
+     * @param title
+     * @param winCount
+     * @param lossCount
+     * @param avgWinRate
+     * @param avgLossRate
+     * @return
+     */
+    private static Map<String, Object> createTradeStasticsItem(String title, Integer winCount, Integer lossCount, Float avgWinRate, Float avgLossRate) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("title", title);
+        data.put("winCount", winCount);
+        data.put("lossCount", lossCount);
+        data.put("avgWinRate", avgWinRate);
+        data.put("avgLossRate", avgLossRate);
+        return data;
     }
 }
