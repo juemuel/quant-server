@@ -2,16 +2,47 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!--DAO的路径-->
 <mapper namespace="com.juemuel.trend.dao.UserDAO">
-    <!--实体类路径-->
+    <!--实体类路径 小写是数据库字段名、驼峰是对象字段名-->
     <resultMap id="BaseUserMap" type="com.juemuel.trend.pojo.User">
-        <id column="id" jdbcType="INTEGER" property="id" />
+        <id column="id" jdbcType="BIGINT" property="id" />
         <result column="username" jdbcType="VARCHAR" property="userName" />
         <result column="password" jdbcType="VARCHAR" property="passWord" />
+        <result column="email" jdbcType="VARCHAR" property="email" />
+        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+        <result column="role" jdbcType="VARCHAR" property="role" />
     </resultMap>
-
     <!--登录查询-->
-    <select id="loginSel" resultType="com.juemuel.trend.pojo.User">
-        select * from user where username = #{userName} and password = #{passWord}
+    <select id="loginSel" resultMap="BaseUserMap">
+        SELECT * FROM users WHERE username = #{userName} AND password = #{passWord}
+    </select>
+    <!--插入用户-->
+    <insert id="insertUser" parameterType="com.juemuel.trend.pojo.User">
+        INSERT INTO users (username, password, email, role)
+        VALUES (#{userName}, #{passWord}, #{email}, #{role})
+    </insert>
+    <!--更新用户-->
+    <update id="updateUser" parameterType="com.juemuel.trend.pojo.User">
+        UPDATE users
+        SET password = #{passWord},
+            email = #{email},
+            role = #{role}
+        WHERE id = #{id}
+    </update>
+
+    <!--删除用户-->
+    <delete id="deleteUser" parameterType="int">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+
+    <!--查询所有用户-->
+    <select id="selectAllUsers" resultMap="BaseUserMap">
+        SELECT * FROM users
+    </select>
+
+    <!--根据ID查询用户-->
+    <select id="selectUserById" resultMap="BaseUserMap" parameterType="int">
+        SELECT * FROM users WHERE id = #{id}
     </select>
 
 </mapper>
