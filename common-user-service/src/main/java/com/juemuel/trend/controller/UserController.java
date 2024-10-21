@@ -3,6 +3,7 @@ package com.juemuel.trend.controller;
 import cn.hutool.json.JSONObject;
 import com.juemuel.trend.pojo.User;
 import com.juemuel.trend.service.UserService;
+import com.juemuel.trend.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,10 @@ public class UserController {
             result.put("state",400);
         }else {
             result.put("state",200);
+            // 返回携带token
+            String token = TokenUtil.sign(jsonObject.getStr("userName"));
+            System.out.println(token);
+            result.put("token",token);
         }
         return  result;
     }
