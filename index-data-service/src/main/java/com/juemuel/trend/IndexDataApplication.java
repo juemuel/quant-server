@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 public class IndexDataApplication {
     public static void main(String[] args) {
         int port = 0;
-        int defaultPort = 8021;
+        int defaultPort = 8121;
         int redisPort = 6379;
         int eurekaServerPort = 8761;
 

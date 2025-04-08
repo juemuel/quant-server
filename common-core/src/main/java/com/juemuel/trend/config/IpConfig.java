@@ -2,9 +2,7 @@ package com.juemuel.trend.config;
 
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
 
-@Component
 public class IpConfig implements ApplicationListener<WebServerInitializedEvent> {
 
     private int serverPort;

@@ -26,7 +26,7 @@ public class IndexService {
     @Autowired RestTemplate restTemplate;
 
     public List<Index> fetch_indexes_from_third_part(){
-        List<Map> temp= restTemplate.getForObject("http://127.0.0.1:8090/indexes/codes.json",List.class);
+        List<Map> temp= restTemplate.getForObject("http://127.0.0.1:8131/indexes/codes.json",List.class);
         return map2Index(temp);
     }
 

@@ -17,15 +17,18 @@
   <!--  写子服务-->
   <modules>
     <module>eruka-server</module>
+    <module>zuul-service</module>
+    <module>config-server</module>
+
+    <module>common-core</module>
+    <module>common-user-service</module>
+
     <module>third-index-data-project</module>
     <module>gather-data-store-service</module>
     <module>index-codes-service</module>
     <module>index-data-service</module>
-    <module>zuul-service</module>
     <module>trend-trading-backtest-service</module>
     <module>trend-trading-backtest-view</module>
-    <module>config-server</module>
-    <module>common-user-service</module>
   </modules>
 
   <packaging>pom</packaging>

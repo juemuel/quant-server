@@ -18,7 +18,7 @@ public class IndexDataController {
     @Autowired
     IpConfig ipConfiguration;
 
-//  http://127.0.0.1:8021/data/000300
+//  http://127.0.0.1:8121/data/000300
 
     @GetMapping("/data/{code}")
     public List<IndexData> get(@PathVariable("code") String code) throws Exception {

@@ -9,15 +9,15 @@ import cn.hutool.core.util.StrUtil;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
 //考虑改写成tushare、理杏仁
-// http://127.0.0.1:8090/indexes/codes.json
-// http://127.0.0.1:8090/indexes/000300.json
+// http://127.0.0.1:8131/indexes/codes.json
+// http://127.0.0.1:8131/indexes/000300.json
 @SpringBootApplication
 @EnableEurekaClient
 public class ThirdIndexDataApplication
 {
     public static void main( String[] args )
     {
-        int port = 8090;
+        int port = 8131;
         int eurekaServerPort = 8761;
 
         if(NetUtil.isUsableLocalPort(eurekaServerPort)) {

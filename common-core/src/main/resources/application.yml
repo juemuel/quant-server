@@ -1,0 +1,5 @@
+# 新配置（修改为）
+common:
+  cache:
+    redis:
+      time-to-live: 30m # 保持相同配置值，只是前缀改变

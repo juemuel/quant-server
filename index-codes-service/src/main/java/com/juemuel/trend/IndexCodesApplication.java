@@ -25,7 +25,7 @@ import java.util.concurrent.TimeoutException;
 public class IndexCodesApplication {
     public static void main(String[] args) {
         int port = 0;
-        int defaultPort = 8011;
+        int defaultPort = 8111;
         int defaultPortMax = defaultPort + 9; // 尝试的最大端口范围
         int redisPort = 6379;
         int eurekaServerPort = 8761;

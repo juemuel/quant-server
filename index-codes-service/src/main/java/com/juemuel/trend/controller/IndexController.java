@@ -18,7 +18,7 @@ public class IndexController {
     @Autowired
     IpConfig ipConfiguration;
 //  注解：允许跨域
-//  http://127.0.0.1:8011/getCodes
+//  http://127.0.0.1:8111/getCodes
 
     @GetMapping("/getCodes")
     @CrossOrigin
