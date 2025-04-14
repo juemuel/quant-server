@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.juemuel.trend.pojo.IndexData;
+import com.juemuel.trend.source.DataSource;
 import com.juemuel.trend.util.SpringContextUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,66 +24,57 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 
 @Service
+@Slf4j
 @CacheConfig(cacheNames="index_datas")
 public class IndexDataService {
-    private Map<String, List<IndexData>> indexDatas=new HashMap<>();
-    @Autowired RestTemplate restTemplate;
+    // 替换为数据源
+    // private Map<String, List<IndexData>> indexDatas=new HashMap<>();
+    // @Autowired RestTemplate restTemplate;
+    private Map<String, List<IndexData>> indexDatas = new HashMap<>();
+    
+    @Autowired
+    private DataSource dataSource;  // 注入数据源
 
     @HystrixCommand(fallbackMethod = "third_part_not_connected")
     public List<IndexData> fresh(String code) {
-        List<IndexData> indexeDatas =fetch_indexes_from_third_part(code);
-
-        indexDatas.put(code, indexeDatas);
-
-//        System.out.println("code:"+code);
-//        System.out.println("indexeDatas:"+indexDatas.get(code).size());
-
+        log.info("刷新指数数据: {}", code);
+        List<IndexData> indexData = dataSource.fetchIndexData(code);
+        indexDatas.put(code, indexData);
         IndexDataService indexDataService = SpringContextUtil.getBean(IndexDataService.class);
         indexDataService.remove(code);
         return indexDataService.store(code);
     }
-
+   /**
+     * 从缓存中移除指数数据
+     */
     @CacheEvict(key="'indexData-code-'+ #p0")
-    public void remove(String code){
-
+    public void remove(String code) {
+        log.info("移除指数数据缓存: {}", code);
     }
-
+    /**
+     * 存储指数数据到缓存
+     */
     @CachePut(key="'indexData-code-'+ #p0")
-    public List<IndexData> store(String code){
+    public List<IndexData> store(String code) {
+        log.info("存储指数数据到缓存: {}", code);
         return indexDatas.get(code);
     }
-
+    /**
+     * 获取指数数据
+     */
     @Cacheable(key="'indexData-code-'+ #p0")
-    public List<IndexData> get(String code){
+    public List<IndexData> get(String code) {
+        log.info("获取指数数据: {}", code);
         return CollUtil.toList();
     }
-
-    public List<IndexData> fetch_indexes_from_third_part(String code){
-        List<Map> temp= restTemplate.getForObject("http://127.0.0.1:8131/indexes/"+code+".json",List.class);
-        return map2IndexData(temp);
-    }
-
-    private List<IndexData> map2IndexData(List<Map> temp) {
-        List<IndexData> indexDatas = new ArrayList<>();
-        for (Map map : temp) {
-            String date = map.get("date").toString();
-            float closePoint = Convert.toFloat(map.get("closePoint"));
-            IndexData indexData = new IndexData();
-
-            indexData.setDate(date);
-            indexData.setClosePoint(closePoint);
-            indexDatas.add(indexData);
-        }
-
-        return indexDatas;
-    }
-
-    public List<IndexData> third_part_not_connected(String code){
-        System.out.println("third_part_not_connected()");
-        IndexData index= new IndexData();
+    /**
+     * 熔断后的降级处理
+     */
+    public List<IndexData> third_part_not_connected(String code) {
+        log.warn("数据源连接失败，返回默认数据: {}", code);
+        IndexData index = new IndexData();
         index.setClosePoint(0);
         index.setDate("n/a");
         return CollectionUtil.toList(index);
     }
-
 }

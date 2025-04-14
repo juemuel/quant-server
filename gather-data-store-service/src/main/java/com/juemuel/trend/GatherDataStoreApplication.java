@@ -27,6 +27,7 @@ public class GatherDataStoreApplication
         int port = defaultPort;
         int eurekaServerPort = 8761;
         int redisPort = 6379;
+        int dataSourcePort = 8131;
 
         if(NetUtil.isUsableLocalPort(eurekaServerPort)) {
             System.err.printf("检查到端口%d 未启用，判断 eureka 服务器没有启动，本服务无法使用，故退出%n", eurekaServerPort );
@@ -36,7 +37,10 @@ public class GatherDataStoreApplication
             System.err.printf("检查到端口%d 未启用，判断 redis 服务器没有启动，本服务无法使用，故退出%n", redisPort );
             System.exit(1);
         }
-
+        if(NetUtil.isUsableLocalPort(dataSourcePort)) {
+            System.err.printf("检查到端口%d 未启用，判断第三方数据服务没有启动，本服务无法使用，故退出%n", dataSourcePort );
+            System.exit(1);
+        }
 
         if(null!=args && 0!=args.length) {
             for (String arg : args) {
@@ -55,10 +59,5 @@ public class GatherDataStoreApplication
         }
         new SpringApplicationBuilder(GatherDataStoreApplication.class).properties("server.port=" + port).run(args);
 
-    }
-
-    @Bean
-    RestTemplate restTemplate() {
-        return new RestTemplate();
     }
 }
