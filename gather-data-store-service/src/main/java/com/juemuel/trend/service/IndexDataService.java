@@ -36,14 +36,19 @@ public class IndexDataService {
     private DataSource dataSource;  // 注入数据源
 
     @HystrixCommand(fallbackMethod = "third_part_not_connected")
+    @CachePut(key="'indexData-code-'+ #p0")  // 添加缓存注解到主方法
     public List<IndexData> fresh(String code) {
         log.info("刷新指数数据: {}", code);
         List<IndexData> indexData = dataSource.fetchIndexData(code);
+        if (indexData == null || indexData.isEmpty()) {
+            log.warn("获取到的数据为空: {}", code);
+            return third_part_not_connected(code);
+        }
         indexDatas.put(code, indexData);
-        IndexDataService indexDataService = SpringContextUtil.getBean(IndexDataService.class);
-        indexDataService.remove(code);
-        return indexDataService.store(code);
+        log.info("刷新指数数据成功: {}", code);
+        return indexData;  // 直接返回数据，不再调用store
     }
+
    /**
      * 从缓存中移除指数数据
      */
@@ -54,11 +59,11 @@ public class IndexDataService {
     /**
      * 存储指数数据到缓存
      */
-    @CachePut(key="'indexData-code-'+ #p0")
-    public List<IndexData> store(String code) {
-        log.info("存储指数数据到缓存: {}", code);
-        return indexDatas.get(code);
-    }
+//    @CachePut(key="'indexData-code-'+ #p0")
+//    public List<IndexData> store(String code) {
+//        log.info("存储指数数据到缓存: {}", code);
+//        return indexDatas.get(code);
+//    }
     /**
      * 获取指数数据
      */
