@@ -38,7 +38,7 @@ public class GatherDataStoreApplication
             System.exit(1);
         }
         if(NetUtil.isUsableLocalPort(dataSourcePort)) {
-            System.err.printf("检查到端口%d 未启用，判断第三方数据服务没有启动，本服务无法使用，故退出%n", dataSourcePort );
+            System.err.printf("检查到端口%d 未启用，判断静态数据服务没有启动，本服务无法使用，故退出%n", dataSourcePort );
             System.exit(1);
         }
 

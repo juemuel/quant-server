@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@Primary // 标记为默认注入的Bean
 public class RestDataSource implements DataSource {
     @Autowired
     private RestTemplate restTemplate;

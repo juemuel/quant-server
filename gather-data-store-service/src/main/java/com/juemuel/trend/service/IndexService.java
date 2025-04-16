@@ -26,14 +26,14 @@ import java.util.Map;
 @CacheConfig(cacheNames="indexes")
 public class IndexService {
     private List<Index> indexes;
-    // 封装数据源
-    // @Autowired RestTemplate restTemplate;
-    // public List<Index> fetch_indexes_from_third_part(){
-    //     List<Map> temp= restTemplate.getForObject("http://127.0.0.1:8131/indexes/codes.json",List.class);
-    //     return map2Index(temp);
-    // }
+    //TIPS: 实例接口的自动注入Bean的逻辑
+    // 法1：实现类Bean可以通过@Primary注解，会优先注入
+    // 法2：实例时可以通过@Qualifier("restDataSource")指定注入的Bean，需要和Bean的@Component的name属性值一致
+    // 法3：实现类Bean可以通过@ConditionalOnProperty条件注解+配置文件中配置，当配置文件中配置了该属性时，会注入对应的Bean
+    // 法4：实现类Bean可以通过@Profile注解，当配置文件中配置了该属性时（环境属性），会注入对应的Bean
+    // 法5：在对应的配置类@Configuration下，通过自定义的逻辑手动注入Bean + 配合配置文件
     @Autowired
-    private DataSource dataSource;  // 注入数据源
+    private DataSource dataSource;
 
     @CacheEvict(allEntries=true)
     public void remove(){
