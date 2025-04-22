@@ -6,23 +6,36 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.juemuel.trend.client.IndexDataClient;
 import com.juemuel.trend.pojo.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BackTestService {
+    private static final Logger log = LoggerFactory.getLogger(BackTestService.class);
     @Autowired
     IndexDataClient indexDataClient;
 
-    public List<IndexData> listIndexData(String code){
+    public List<IndexData> listIndexData(String code) {
         List<IndexData> result = indexDataClient.getIndexData(code);
-        Collections.reverse(result);
 
-        for (IndexData indexData : result) {
-            System.out.println(indexData.getDate());
+        if (result == null || result.isEmpty()) {
+            log.warn("从数据源获取数据为空: code={}", code);
+            return new ArrayList<>();
         }
+
+        log.info("获取到原始数据: size={}", result.size());
+        // 检查数据有效性
+        result = result.stream()
+                .filter(data -> data != null && data.getDate() != null && !"0000-00-00".equals(data.getDate()))
+                .collect(Collectors.toList());
+
+        log.info("过滤后的有效数据: size={}", result.size());
+        Collections.reverse(result);
 
         return result;
     }
@@ -46,6 +59,7 @@ public class BackTestService {
 
         // 遍历所有数据
         float init =0; // 初始化收盘价
+        log.info("初始的indexDatas{}", indexDatas);
         if(!indexDatas.isEmpty())
             init = indexDatas.get(0).getClosePoint();
         // 计算多个移动平均线
@@ -181,8 +195,13 @@ public class BackTestService {
     private float getIndexIncome(int year, List<IndexData> indexDatas) {
         IndexData first=null;
         IndexData last=null;
+        log.info("getIndexIncome: {}", indexDatas);
         for (IndexData indexData : indexDatas) {
             String strDate = indexData.getDate();
+            if (strDate == null || "0000-00-00".equals(strDate)) {
+                log.info("无效日期：" + strDate);
+                continue;  // 跳过无效日期
+            }
 //			Date date = DateUtil.parse(strDate);
             int currentYear = getYear(strDate);
             if(currentYear == year) {
@@ -241,6 +260,10 @@ public class BackTestService {
      */
     private List<AnnualProfit> caculateAnnualProfits(List<IndexData> indexDatas, List<Profit> profits) {
         List<AnnualProfit> result = new ArrayList<>();
+        if (indexDatas == null || indexDatas.isEmpty() || profits == null || profits.isEmpty()) {
+            log.info("计算年度收益时数据为空 {}", indexDatas);
+            return result;
+        }
         String strStartDate = indexDatas.get(0).getDate();
         String strEndDate = indexDatas.get(indexDatas.size()-1).getDate();
         Date startDate = DateUtil.parse(strStartDate);

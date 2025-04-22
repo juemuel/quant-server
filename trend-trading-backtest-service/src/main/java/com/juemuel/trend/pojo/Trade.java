@@ -1,6 +1,8 @@
 package com.juemuel.trend.pojo;
 
-public class Trade {
+import java.io.Serializable;
+
+public class Trade implements Serializable {
 
     private String buyDate;
     private String sellDate;

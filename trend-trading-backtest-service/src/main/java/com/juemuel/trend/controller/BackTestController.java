@@ -4,6 +4,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.juemuel.trend.pojo.*;
 import com.juemuel.trend.service.BackTestService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,7 @@ import java.util.*;
 
 @RestController
 public class BackTestController {
+    private static final Logger log = LoggerFactory.getLogger(BackTestController.class);
     @Autowired BackTestService backTestService;
 
     @GetMapping("/simulate/{code}/{ma}/{buyThreshold}/{sellThreshold}/{serviceCharge}/{startDate}/{endDate}")
@@ -28,7 +31,10 @@ public class BackTestController {
             ,@PathVariable("endDate") String strEndDate
     ) throws Exception {
         List<IndexData> allIndexDatas = backTestService.listIndexData(code);
-
+        if (allIndexDatas == null || allIndexDatas.isEmpty()) {
+            log.info("没有获得指数回测数据");
+            return new HashMap<>();  // 返回空结果
+        }
         String indexStartDate = allIndexDatas.get(0).getDate();
         String indexEndDate = allIndexDatas.get(allIndexDatas.size()-1).getDate();
         allIndexDatas = filterByDateRange(allIndexDatas,strStartDate, strEndDate);

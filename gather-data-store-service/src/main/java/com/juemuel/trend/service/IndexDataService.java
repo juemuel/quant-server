@@ -23,15 +23,17 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 
+/**
+ * 指数数据服务
+ * 首次访问：从数据源获取，然后存入 Redis 和内存
+ * 后续访问：优先从 Redis 缓存获取
+ * 定时任务：定时执行都会重新获取文件并更新缓存
+ */
 @Service
 @Slf4j
 @CacheConfig(cacheNames="index_datas")
 public class IndexDataService {
-    // 替换为数据源
-    // private Map<String, List<IndexData>> indexDatas=new HashMap<>();
-    // @Autowired RestTemplate restTemplate;
     private Map<String, List<IndexData>> indexDatas = new HashMap<>();
-    
     @Autowired
     private DataSource dataSource;  // 注入数据源
 
@@ -39,6 +41,7 @@ public class IndexDataService {
     @CachePut(key="'indexData-code-'+ #p0")  // 添加缓存注解到主方法
     public List<IndexData> fresh(String code) {
         log.info("刷新指数数据: {}", code);
+        remove(code);  // 先清除旧缓存
         List<IndexData> indexData = dataSource.fetchIndexData(code);
         if (indexData == null || indexData.isEmpty()) {
             log.warn("获取到的数据为空: {}", code);
@@ -57,20 +60,17 @@ public class IndexDataService {
         log.info("移除指数数据缓存: {}", code);
     }
     /**
-     * 存储指数数据到缓存
-     */
-//    @CachePut(key="'indexData-code-'+ #p0")
-//    public List<IndexData> store(String code) {
-//        log.info("存储指数数据到缓存: {}", code);
-//        return indexDatas.get(code);
-//    }
-    /**
      * 获取指数数据
      */
     @Cacheable(key="'indexData-code-'+ #p0")
     public List<IndexData> get(String code) {
-        log.info("获取指数数据: {}", code);
-        return CollUtil.toList();
+        log.info("缓存未命中，从数据源获取指数数据: {}", code);
+        List<IndexData> data = dataSource.fetchIndexData(code);
+        if (data == null || data.isEmpty()) {
+            log.warn("数据源返回空数据: {}", code);
+            return third_part_not_connected(code);
+        }
+        return data;
     }
     /**
      * 熔断后的降级处理

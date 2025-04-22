@@ -1,6 +1,8 @@
 package com.juemuel.trend.pojo;
 
-public class Profit {
+import java.io.Serializable;
+
+public class Profit implements Serializable {
 
     String date;
     float value;

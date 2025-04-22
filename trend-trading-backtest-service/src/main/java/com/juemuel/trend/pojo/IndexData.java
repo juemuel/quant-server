@@ -1,6 +1,8 @@
 package com.juemuel.trend.pojo;
 
-public class IndexData {
+import java.io.Serializable;
+
+public class IndexData implements Serializable {
 
     String date;
     float closePoint;
