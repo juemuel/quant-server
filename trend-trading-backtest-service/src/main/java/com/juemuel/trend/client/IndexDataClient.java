@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 // 访问不了的时候，就去找 IndexDataClientFeignHystrix 要数据
 @Primary
-@FeignClient(value = "INDEX-DATA-SERVICE",fallback = IndexDataClientFeignHystrix.class)
+@FeignClient(value = "INDEX-SERVICE",fallback = IndexDataClientFeignHystrix.class)
 public interface IndexDataClient {
     @GetMapping("/data/{code}")
     public List<IndexData> getIndexData(@PathVariable("code") String code);

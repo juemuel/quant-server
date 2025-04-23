@@ -22,21 +22,16 @@ public class BackTestService {
 
     public List<IndexData> listIndexData(String code) {
         List<IndexData> result = indexDataClient.getIndexData(code);
-
         if (result == null || result.isEmpty()) {
             log.warn("从数据源获取数据为空: code={}", code);
             return new ArrayList<>();
         }
-
-        log.info("获取到原始数据: size={}", result.size());
         // 检查数据有效性
         result = result.stream()
                 .filter(data -> data != null && data.getDate() != null && !"0000-00-00".equals(data.getDate()))
                 .collect(Collectors.toList());
-
-        log.info("过滤后的有效数据: size={}", result.size());
+        log.info("有效数据: size={}", result.size());
         Collections.reverse(result);
-
         return result;
     }
     public Map<String,Object> simulate(int ma, float sellRate, float buyRate, float serviceCharge, List<IndexData> indexDatas)  {
@@ -59,7 +54,7 @@ public class BackTestService {
 
         // 遍历所有数据
         float init =0; // 初始化收盘价
-        log.info("初始的indexDatas{}", indexDatas);
+//        log.info("初始的indexDatas{}", indexDatas);
         if(!indexDatas.isEmpty())
             init = indexDatas.get(0).getClosePoint();
         // 计算多个移动平均线
@@ -195,7 +190,7 @@ public class BackTestService {
     private float getIndexIncome(int year, List<IndexData> indexDatas) {
         IndexData first=null;
         IndexData last=null;
-        log.info("getIndexIncome: {}", indexDatas);
+//        log.info("getIndexIncome: {}", indexDatas);
         for (IndexData indexData : indexDatas) {
             String strDate = indexData.getDate();
             if (strDate == null || "0000-00-00".equals(strDate)) {
@@ -273,7 +268,7 @@ public class BackTestService {
         for (int year =startYear; year <= endYear; year++) {
             AnnualProfit annualProfit = new AnnualProfit();
             annualProfit.setYear(year);
-            System.out.println(year + ":"+indexDatas);
+//            System.out.println(year + ":"+indexDatas);
             float indexIncome = getIndexIncome(year,indexDatas);
             float trendIncome = getTrendIncome(year,profits);
             annualProfit.setIndexIncome(indexIncome);

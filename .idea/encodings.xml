@@ -8,9 +8,9 @@
     <file url="file://$PROJECT_DIR$/eureka-server/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/gather-data-store-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/gather-data-store-service/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/index-codes-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/index-data-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/index-data-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/index-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/third-index-data-project/src/main/java" charset="UTF-8" />

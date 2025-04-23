@@ -10,7 +10,7 @@ zuul:
   routes:
     index-codes:
       path: /index-codes/**
-      serviceId: INDEX-CODES-SERVICE
+      serviceId: INDEX-SERVICE
     back-test-service:
       path: /backtest/**
       serviceId: TREND-TRADING-BACKTEST-SERVICE

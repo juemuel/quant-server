@@ -25,8 +25,7 @@
 
     <module>third-index-data-project</module>
     <module>gather-data-store-service</module>
-    <module>index-codes-service</module>
-    <module>index-data-service</module>
+    <module>index-service</module>
     <module>trend-trading-backtest-service</module>
 
     <module>trend-trading-backtest-view</module>

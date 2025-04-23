@@ -5,5 +5,8 @@ eureka:
 spring:
   application:
     name:  trend-trading-backtest-service
-
+common:
+  cache:
+    redis:
+      time-to-live: 1800s  # 30分钟
 feign.hystrix.enabled: true
