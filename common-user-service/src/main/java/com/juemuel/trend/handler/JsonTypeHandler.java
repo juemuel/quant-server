@@ -1,11 +1,11 @@
 package com.juemuel.trend.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedTypes;
-import org.apache.ibatis.type.TypeReference;
 
 import java.io.IOException;
 import java.sql.CallableStatement;
@@ -21,8 +21,12 @@ public class JsonTypeHandler extends BaseTypeHandler<Map<String, Object>> {
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i,
-                                    Map<String, Object> parameter, JdbcType jdbcType) throws JsonProcessingException, SQLException {
-        ps.setString(i, objectMapper.writeValueAsString(parameter));
+                                    Map<String, Object> parameter, JdbcType jdbcType) throws SQLException {
+        try {
+            ps.setString(i, objectMapper.writeValueAsString(parameter));
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new SQLException("JSON 序列化失败", e); // 将 Jackson 异常转换为 SQLException
+        }
     }
 
     @Override

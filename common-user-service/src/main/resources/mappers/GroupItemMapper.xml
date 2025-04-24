@@ -24,7 +24,7 @@
         <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
     </resultMap>
     <!-- 更新组元素 -->
-    <update id="updateGroupItem" parameterType="com.juemuel.trend.pojo.group.GroupItem">
+    <update id="updateGroupItem" parameterType="com.juemuel.trend.pojo.GroupItem">
         UPDATE group_item
         <set>
             <if test="name != null">name = #{name},</if>
