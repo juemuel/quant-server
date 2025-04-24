@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.juemuel.trend.dao.GroupMapper">
+    <!--实体类路径 小写是数据库字段名、驼峰是对象字段名-->
+    <resultMap id="GroupResultMap" type="com.juemuel.trend.pojo.Group">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="type_code" property="typeCode" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="sort_order" property="sortOrder" jdbcType="INTEGER"/>
+        <result column="owner_id" property="ownerId" jdbcType="BIGINT"/>
+        <result column="is_active" property="isActive" jdbcType="BOOLEAN"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <!-- 创建分组 -->
+    <insert id="insertGroup" parameterType="com.juemuel.trend.pojo.Group">
+        INSERT INTO `group` (type_code, name, sort_order, owner_id, is_active)
+        VALUES (#{typeCode}, #{name}, #{sortOrder}, #{ownerId}, #{isActive})
+    </insert>
+    <!-- 更新分组 -->
+    <update id="updateGroup" parameterType="com.juemuel.trend.pojo.Group">
+        UPDATE `group`
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="isActive != null">is_active = #{isActive},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <!-- 查询用户分组（支持按类型过滤） -->
+    <select id="selectGroupsByUser" resultType="Group">
+        SELECT * FROM `group`
+        WHERE owner_id = #{userId} AND is_active = TRUE
+        <if test="typeCode != null">
+            AND type_code = #{typeCode}
+        </if>
+        ORDER BY sort_order ASC
+    </select>
+</mapper>

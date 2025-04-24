@@ -22,4 +22,5 @@ public class UserServiceImpl implements UserService {
         System.out.println("login service" + userInfo);
         return userDAO.loginSel(userInfo);
     }
+    // TODO:实现注册等功能
 }
