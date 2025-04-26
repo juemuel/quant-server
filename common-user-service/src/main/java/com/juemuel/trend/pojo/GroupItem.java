@@ -3,13 +3,15 @@ package com.juemuel.trend.pojo;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public class GroupItem {
     private Long id;
     private Long groupId;
     private String name;
     private String notes;
-    private String customData; // JSON 字符串
+//    private String customData; // JSON 字符串
+    private Map<String, Object> customData;
     private Integer sortOrder;
     private Boolean isActive;
     private Timestamp createdAt;
@@ -48,11 +50,11 @@ public class GroupItem {
         this.notes = notes;
     }
 
-    public String getCustomData() {
+    public Map<String, Object> getCustomData() {
         return customData;
     }
 
-    public void setCustomData(String customData) {
+    public void setCustomData(Map<String, Object> customData) {
         this.customData = customData;
     }
 
@@ -64,11 +66,11 @@ public class GroupItem {
         this.sortOrder = sortOrder;
     }
 
-    public Boolean getActive() {
+    public Boolean getIsActive() {
         return isActive;
     }
 
-    public void setActive(Boolean active) {
+    public void setIsActive(Boolean active) {
         isActive = active;
     }
 

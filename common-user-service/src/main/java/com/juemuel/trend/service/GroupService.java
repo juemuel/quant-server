@@ -12,6 +12,6 @@ public interface GroupService {
 
     // 组内元素操作：增、删、查
     GroupItem addItemToGroup(Long groupId, String itemName, Map<String, Object> customData, Long ownerId);
-    void removeItem(Long itemId, Long ownerId);
+    void deleteItem(Long itemId, Long ownerId);
     List<GroupItem> searchItems(Long groupId, String keyword, List<String> tags);
 }

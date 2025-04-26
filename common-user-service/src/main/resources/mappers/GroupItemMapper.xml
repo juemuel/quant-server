@@ -7,7 +7,7 @@
         <result column="group_id" property="groupId" jdbcType="BIGINT"/>
         <result column="name" property="name" jdbcType="VARCHAR"/>
         <result column="notes" property="notes" jdbcType="LONGVARCHAR"/>
-        <result column="custom_data" property="customData" jdbcType="LONGVARCHAR"
+        <result column="custom_data" property="customData"
                 typeHandler="com.juemuel.trend.handler.JsonTypeHandler"/> <!-- 自定义 JSON 处理器 -->
         <result column="sort_order" property="sortOrder" jdbcType="INTEGER"/>
         <result column="is_active" property="isActive" jdbcType="BOOLEAN"/>
@@ -23,6 +23,7 @@
         <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
         <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
     </resultMap>
+    <!-- 增删（注解）+updateGroupItem、selectItemsByTags、selectTagsByItemId（xml）+查询某个组元素（注解）   -->
     <!-- 更新组元素 -->
     <update id="updateGroupItem" parameterType="com.juemuel.trend.pojo.GroupItem">
         UPDATE group_item
@@ -35,8 +36,7 @@
         </set>
         WHERE id = #{id}
     </update>
-
-    <!-- 按标签搜索组元素 -->
+    <!-- 根据标签搜索组元素-->
     <select id="selectItemsByTags" resultMap="GroupItemResultMap">
         SELECT gi.*
         FROM group_item gi
@@ -54,7 +54,6 @@
         </if>
         ORDER BY gi.sort_order ASC
     </select>
-
     <!-- 查询元素的标签（供 collection 使用） -->
     <select id="selectTagsByItemId" resultMap="TagResultMap">
         SELECT t.*

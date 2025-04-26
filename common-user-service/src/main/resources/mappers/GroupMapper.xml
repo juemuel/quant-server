@@ -12,21 +12,7 @@
         <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
         <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
     </resultMap>
-    <!-- 创建分组 -->
-    <insert id="insertGroup" parameterType="com.juemuel.trend.pojo.Group">
-        INSERT INTO `group` (type_code, name, sort_order, owner_id, is_active)
-        VALUES (#{typeCode}, #{name}, #{sortOrder}, #{ownerId}, #{isActive})
-    </insert>
-    <!-- 更新分组 -->
-    <update id="updateGroup" parameterType="com.juemuel.trend.pojo.Group">
-        UPDATE `group`
-        <set>
-            <if test="name != null">name = #{name},</if>
-            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
-            <if test="isActive != null">is_active = #{isActive},</if>
-        </set>
-        WHERE id = #{id}
-    </update>
+    <!-- 增删改（注解）+selectGroupsByUser（xml）+用id查分组信息（注解） -->
     <!-- 查询用户分组（支持按类型过滤） -->
     <select id="selectGroupsByUser" resultMap="GroupResultMap">
         SELECT * FROM `group`

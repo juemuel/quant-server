@@ -21,6 +21,15 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional
     public Group createGroup(String typeCode, String name, Long ownerId) {
+        // TODO:检查用户是否存在
+//        if (!userDao.existsById(group.getOwnerId())) {
+//            throw new IllegalArgumentException("用户不存在，ID: " + group.getOwnerId());
+//        }
+
+        // TODO:检查typeCode是否存在
+//        if (!groupTypeDao.existsByTypeCode(group.getTypeCode())) {
+//            throw new IllegalArgumentException("无效的typeCode: " + group.getTypeCode());
+//        }
         Group group = new Group();
         group.setTypeCode(typeCode);
         group.setName(name);
@@ -33,12 +42,19 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional
     public void deleteGroup(Long groupId, Long ownerId) {
+        System.out.println("删除分组请求 - groupId: " + groupId + ", ownerId: " + ownerId);
         Group group = groupMapper.selectGroupById(groupId);
+        System.out.println("查询到的分组: " + group);
         if (group == null || !group.getOwnerId().equals(ownerId)) {
+            String errorMsg = group == null ? "分组不存在" : "分组ownerId不匹配(期望:"+ownerId+",实际:"+group.getOwnerId()+")";
+            System.out.println("验证失败: " + errorMsg);
             throw new RuntimeException("无权操作或分组不存在");
         }
+
+        System.out.println("准备更新分组状态为未激活");
         group.setIsActive(false);
-        groupMapper.updateGroup(group);
+        int affected = groupMapper.updateGroup(group);
+        System.out.println("更新影响行数: " + affected);
     }
 
     @Override
@@ -64,12 +80,12 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Transactional
-    public void removeItem(Long itemId, Long ownerId) {
+    public void deleteItem(Long itemId, Long ownerId) {
         GroupItem item = groupItemMapper.selectItemById(itemId);
         if (item != null) {
             Group group = groupMapper.selectGroupById(item.getGroupId());
             if (group.getOwnerId().equals(ownerId)) {
-                groupItemMapper.deleteItem(itemId);
+                groupItemMapper.deleteItem(itemId, ownerId);
             }
         }
     }
