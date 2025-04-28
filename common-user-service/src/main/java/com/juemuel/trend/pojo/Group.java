@@ -76,4 +76,16 @@ public class Group {
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
+    @Override
+    public String toString() {
+        return "Group{" +
+                "id=" + id +
+                ", typeCode='" + typeCode + '\'' +
+                ", name='" + name + '\'' +
+                ", ownerId=" + ownerId +
+                ", isActive=" + isActive +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

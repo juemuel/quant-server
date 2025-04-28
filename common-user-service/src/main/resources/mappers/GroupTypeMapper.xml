@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--DAO的路径-->
+<mapper namespace="com.juemuel.trend.dao.GroupTypeMapper">
+    <!--实体类路径 小写是数据库字段名、驼峰是对象字段名-->
+    <resultMap id="GroupTypeResultMap" type="com.juemuel.trend.pojo.GroupType">
+        <id property="id" column="id" />
+        <result property="typeCode" column="type_code"/>
+        <result property="typeName" column="type_name"/>
+        <result property="config" column="config"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <!--登录查询-->
+    <select id="existsByTypeCode" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM group_type
+        WHERE type_code = #{typeCode}
+    </select>
+    <insert id="insertGroupType" parameterType="com.juemuel.trend.pojo.GroupType">
+        INSERT INTO group_type (
+            type_code,
+            type_name,
+            config,
+            created_at,
+            updated_at
+        ) VALUES (
+                     #{typeCode},
+                     #{typeName},
+                     #{config},
+                     #{createdAt},
+                     #{updatedAt}
+                 )
+    </insert>
+
+    <update id="updateGroupType" parameterType="com.juemuel.trend.pojo.GroupType">
+        UPDATE group_type SET
+                              type_name = #{typeName},
+                              config = #{config},
+                              updated_at = #{updatedAt}
+        WHERE type_code = #{typeCode}
+    </update>
+</mapper>

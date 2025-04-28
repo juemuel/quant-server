@@ -44,5 +44,10 @@
     <select id="selectUserById" resultMap="BaseUserMap" parameterType="int">
         SELECT * FROM users WHERE id = #{id}
     </select>
-
+    <!--根据ID查询用户是否存在   -->
+    <select id="existsById" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM users
+        WHERE id = #{id}
+    </select>
 </mapper>

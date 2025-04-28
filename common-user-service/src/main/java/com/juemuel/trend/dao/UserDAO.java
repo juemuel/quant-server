@@ -14,4 +14,8 @@ public interface UserDAO {
      * @return
      */
     User loginSel(Map<String,Object> userInfo);
+    /**
+     * 检查用户是否存在
+     */
+    boolean existsById(Long id);
 }

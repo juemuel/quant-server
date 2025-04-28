@@ -7,6 +7,8 @@ spring:
     password: root
     driver-class-name: com.mysql.jdbc.Driver
 mybatis:
+  configuration:
+    map-underscore-to-camel-case: true # 加上该配置，mybatis自动将下划线转驼峰，否则会拿到null
   type-handlers-package: com.juemuel.trend.handler
   mapper-locations: classpath:mappers/*
 eureka:

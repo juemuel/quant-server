@@ -18,13 +18,22 @@ public interface GroupItemMapper {
     int insertGroupItem(GroupItem item);
 
     /**
-     * 删除组元素（注解）
+     * 逻辑删除子元素
+     * @param itemId
+     * @param userId
+     * @return
+     */
+    @Update("UPDATE group_item SET is_active = 0 WHERE id = #{itemId} " +
+            "AND group_id IN (SELECT id FROM `group` WHERE owner_id = #{userId})")
+    int deleteItem(@Param("itemId") Long itemId, @Param("userId") Long userId);
+    /**
+     * 物理删除组元素（注解）
      * @param itemId
      * @param userId
      * @return
      */
     @Delete("DELETE FROM group_item WHERE id = #{itemId} AND group_id IN (SELECT id FROM `group` WHERE owner_id = #{userId})")
-    int deleteItem(@Param("itemId") Long itemId, @Param("userId") Long userId);
+    int physicalDeleteItem(@Param("itemId") Long itemId, @Param("userId") Long userId);
 
     /**
      * 更新组元素（xml）
