@@ -55,10 +55,17 @@ public class GroupServiceImpl implements GroupService {
         int affected = groupMapper.updateGroup(group);
     }
 
+    /**
+     * 获取分组列表（不含分组子项)
+     * @param userId
+     * @param typeCode
+     * @return
+     */
     @Override
     public List<Group> getUserGroups(Long userId, String typeCode) {
         return groupMapper.selectGroupsByUser(userId, typeCode);
     }
+    //TODO:增加一个而获取GroupsData（包含分组信息的接口）
 
     @Override
     @Transactional
