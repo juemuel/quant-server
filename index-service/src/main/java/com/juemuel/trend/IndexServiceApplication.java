@@ -19,6 +19,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * TODO: 计划调整为DATA-SERVICE
+ * 包括本地存储
+ * 考虑改写成tushare、理杏仁
+ * http://127.0.0.1:8111/indexes/codes.json
+ * http://127.0.0.1:8111/indexes/000300.json
+ */
 @SpringBootApplication
 @EnableEurekaClient
 @EnableCaching

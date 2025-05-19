@@ -23,9 +23,9 @@
     <module>common-core</module>
     <module>common-api</module>
 
-    <module>local-index-data</module>
     <module>gather-data-store-service</module>
     <module>index-service</module>
+
     <module>quant-backtest-service</module>
   </modules>
 
