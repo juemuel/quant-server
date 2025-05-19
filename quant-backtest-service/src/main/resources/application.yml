@@ -1,0 +1,12 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+spring:
+  application:
+    name: quant-backtest-service
+common:
+  cache:
+    redis:
+      time-to-live: 1800s  # 30分钟
+feign.hystrix.enabled: true

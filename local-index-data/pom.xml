@@ -7,8 +7,8 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zuul-service</artifactId>
-    <name>zuul-service</name>
+    <artifactId>local-index-data</artifactId>
+    <name>local-index-data</name>
     <!-- jar打包可以默认不写-->
     <!-- <packaging>jar</packaging>-->
 
@@ -25,10 +25,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-zuul</artifactId>
         </dependency>
     </dependencies>
 </project>

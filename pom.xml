@@ -21,14 +21,12 @@
     <module>config-server</module>
 
     <module>common-core</module>
-    <module>common-user-service</module>
+    <module>common-api</module>
 
-    <module>third-index-data-project</module>
+    <module>local-index-data</module>
     <module>gather-data-store-service</module>
     <module>index-service</module>
-    <module>trend-trading-backtest-service</module>
-
-    <module>trend-trading-backtest-view</module>
+    <module>quant-backtest-service</module>
   </modules>
 
   <packaging>pom</packaging>

@@ -8,15 +8,12 @@ spring:
 zuul:
   prefix: /api
   routes:
-    index-codes:
-      path: /index-codes/**
+    index-service:
+      path: /index/**
       serviceId: INDEX-SERVICE
-    back-test-service:
+    quant-back-test-service:
       path: /backtest/**
-      serviceId: TREND-TRADING-BACKTEST-SERVICE
-    back-test-view:
-      path: /backtest-view/**
-      serviceId: TREND-TRADING-BACKTEST-VIEW
-    common-user-service:
-      path: /common-user/**
-      service-id: COMMON-USER-SERVICE
+      serviceId: QUANT-BACKTEST-SERVICE
+    common-api:
+      path: /common/**
+      service-id: COMMON-API
