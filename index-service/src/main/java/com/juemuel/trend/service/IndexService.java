@@ -14,6 +14,11 @@ import cn.hutool.core.collection.CollUtil;
 public class IndexService {
     private List<Index> indexes;
 
+    /**
+     * 如果缓存中有 key 为 'all_codes' 的数据，则直接返回缓存；
+     * 如果没有，则执行方法体并缓存结果
+     * @return
+     */
     @Cacheable(key="'all_codes'")
     public List<Index> get(){
         Index index = new Index();

@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component("LocalFileDataSource")
 public class LocalFileDataSource implements DataSource {
+    /**
+     * 使用restTemplate获取其他模块接口的数据
+     */
     @Autowired
     private RestTemplate restTemplate;
     

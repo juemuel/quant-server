@@ -46,19 +46,29 @@ public class IndexService {
         return indexes;
     }
 
+    /**
+     * 如果缓存中有 key 为 'all_codes' 的数据，则直接返回缓存；
+     * 如果没有，则执行方法体并缓存结果
+     * @return
+     */
     @Cacheable(key="'all_codes'")
     public List<Index> get(){
         return CollUtil.toList();
     }
 
+    /**
+     * 会清空缓存，并强制下一次调用 get() 时重新从数据源获取最新数据
+     * @return
+     */
+
     @HystrixCommand(fallbackMethod = "third_part_not_connected")
     public List<Index> fresh() {
         log.info("刷新指数代码");
-        indexes = dataSource.fetchIndexes();
+        indexes = dataSource.fetchIndexes(); // 实际从数据源获取数据
         // SpringContextUtil.getBean 方式拿到的对象，会注入配置中对应的对象。 而new 出来就不会了。
         IndexService indexService = SpringContextUtil.getBean(IndexService.class);
-        indexService.remove();
-        return indexService.store();
+        indexService.remove(); // 清除缓存
+        return indexService.store(); // 存入新数据到缓存
     }
     public List<Index> third_part_not_connected(){
         log.warn("数据源连接失败，返回默认数据");

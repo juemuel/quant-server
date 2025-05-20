@@ -24,7 +24,6 @@ public class IndexController {
     @CrossOrigin
     public List<Index> getCodes() throws Exception {
         System.out.println("[controller]port:" + ipConfiguration.getPort());
-        //TODO:现在get实现好像只能从缓存取了？
         return indexService.get();
     }
 }

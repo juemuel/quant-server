@@ -7,7 +7,7 @@ spring:
     name: index-zuul-service
 zuul:
   prefix: /api
-  routes:
+  routes: # 微服务启动时会把主机端口注册到Eureka Server，名称为大写；Zuul基于名称去找对应地址做转发
     index-service:
       path: /index/**
       serviceId: INDEX-SERVICE
