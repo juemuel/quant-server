@@ -25,7 +25,7 @@ public class LocalFileDataSource implements DataSource {
     public List<Index> fetchIndexes() {
         try {
             log.info("从LocalFire获取指数列表");
-            List<Map> temp = restTemplate.getForObject("http://127.0.0.1:8131/indexes/codes.json", List.class);
+            List<Map> temp = restTemplate.getForObject("http://127.0.0.1:8111/indexes/codes.json", List.class);
             return map2Index(temp);
         } catch (Exception e) {
             log.error("获取指数列表失败: {}", e.getMessage());
@@ -36,7 +36,7 @@ public class LocalFileDataSource implements DataSource {
     @Override
     public List<IndexData> fetchIndexData(String code) {
         try {
-            String url = "http://127.0.0.1:8131/indexes/" + code + ".json";
+            String url = "http://127.0.0.1:8111/indexes/" + code + ".json";
             log.info("获取指数数据, URL: {}", url);
 
             // 先检查资源是否存在

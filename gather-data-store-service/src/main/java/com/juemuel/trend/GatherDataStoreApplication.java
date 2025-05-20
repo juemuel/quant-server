@@ -27,7 +27,7 @@ public class GatherDataStoreApplication
         int port = defaultPort;
         int eurekaServerPort = 8761;
         int redisPort = 6379;
-        int dataSourcePort = 8131;
+        int dataSourcePort = 8111;
 
         if(NetUtil.isUsableLocalPort(eurekaServerPort)) {
             System.err.printf("检查到端口%d 未启用，判断 eureka 服务器没有启动，本服务无法使用，故退出%n", eurekaServerPort );
