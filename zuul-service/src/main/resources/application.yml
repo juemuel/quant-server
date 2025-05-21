@@ -8,12 +8,12 @@ spring:
 zuul:
   prefix: /api
   routes: # 微服务启动时会把主机端口注册到Eureka Server，名称为大写；Zuul基于名称去找对应地址做转发
-    index-service:
-      path: /index/**
-      serviceId: INDEX-SERVICE
-    quant-back-test-service:
-      path: /backtest/**
-      serviceId: QUANT-BACKTEST-SERVICE
+    data-service:
+      path: /data/**
+      serviceId: DATA-SERVICE
+    quant-service:
+      path: /quant/**
+      serviceId: QUANT-SERVICE
     common-api:
       path: /common/**
       service-id: COMMON-API
