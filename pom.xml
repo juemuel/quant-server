@@ -24,7 +24,6 @@
     <module>common-api</module>
 
     <module>data-service</module>
-
     <module>quant-service</module>
   </modules>
 
