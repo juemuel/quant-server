@@ -5,9 +5,9 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Unit test for simple App.
+ * Unit test for simple DataServiceApplication.
  */
-public class GatherDataStoreApplicationTest
+public class AppTest 
     extends TestCase
 {
     /**
@@ -15,7 +15,7 @@ public class GatherDataStoreApplicationTest
      *
      * @param testName name of the test case
      */
-    public GatherDataStoreApplicationTest(String testName )
+    public AppTest( String testName )
     {
         super( testName );
     }
@@ -25,7 +25,7 @@ public class GatherDataStoreApplicationTest
      */
     public static Test suite()
     {
-        return new TestSuite( GatherDataStoreApplicationTest.class );
+        return new TestSuite( AppTest.class );
     }
 
     /**

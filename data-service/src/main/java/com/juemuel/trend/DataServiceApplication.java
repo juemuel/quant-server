@@ -23,8 +23,7 @@ public class DataServiceApplication
 {
     public static void main( String[] args )
     {
-        int defaultPort = 8001;
-        int port = defaultPort;
+        int port = 8001;
         int eurekaServerPort = 8761;
         int redisPort = 6379;
 //        int dataSourcePort = 8111;

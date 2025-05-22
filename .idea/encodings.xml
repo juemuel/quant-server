@@ -6,6 +6,8 @@
     <file url="file://$PROJECT_DIR$/config-server/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/data-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/data-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/datas-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/datas-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/eruka-server/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/eureka-server/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/gather-data-store-service/src/main/java" charset="UTF-8" />
