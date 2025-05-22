@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin  //支持跨域
+//@CrossOrigin  //支持跨域
 public class UserController {
     @Autowired
     UserService userService;

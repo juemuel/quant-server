@@ -19,8 +19,11 @@ public class BackTestController {
     private static final Logger log = LoggerFactory.getLogger(BackTestController.class);
     @Autowired BackTestService backTestService;
 
+    // @CrossOrigin和@CrossOrigin(origins = "http://localhost:8080")某个特定域名只能添加一个
+    // @CroosOrigin默认设置了Access-Control-Allow-Origin: *
+    // 但是浏览器不允许同时设置多处设置，这边在网关处设置了*，所以不再添加@CrossOrigin
     @GetMapping("/simulate/{code}/{ma}/{buyThreshold}/{sellThreshold}/{serviceCharge}/{startDate}/{endDate}")
-    @CrossOrigin
+//    @CrossOrigin
     public Map<String,Object> backTest(
             @PathVariable("code") String code
             ,@PathVariable("ma") int ma
