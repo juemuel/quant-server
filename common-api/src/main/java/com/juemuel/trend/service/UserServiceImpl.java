@@ -20,7 +20,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public User login(Map<String,Object> userInfo){
         System.out.println("login service" + userInfo);
-        return userDAO.loginSel(userInfo);
+        User user = userDAO.loginSel(userInfo);
+        if (user == null) {
+            System.out.println("未找到用户，请检查用户名或密码");
+        } else {
+            System.out.println("找到用户：" + user.getUserName());
+        }
+        return user;
     }
     // TODO:实现注册等功能
 }

@@ -7,6 +7,12 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 
+/**
+ * Zuul网关中
+ * CORS放行（Access-Control-Allow-Origin）、
+ * 路由转发（application.yml）
+ * 权限拦截控制发生在具体的微服务层，需要配置CORS拦截器
+ */
 @SpringBootApplication
 @EnableZuulProxy
 @EnableEurekaClient
