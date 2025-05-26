@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-//@CrossOrigin  //支持跨域
+@CrossOrigin(allowCredentials = "true")  //支持跨域
 @RequestMapping("/group") // 统一前缀
 public class GroupController {
 
