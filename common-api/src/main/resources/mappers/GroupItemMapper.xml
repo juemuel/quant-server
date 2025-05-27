@@ -23,6 +23,7 @@
         <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
         <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
     </resultMap>
+
     <!-- 增删（注解）+updateGroupItem、selectItemsByTags、selectTagsByItemId（xml）+查询某个组元素（注解）   -->
     <!-- 更新组元素 -->
     <update id="updateGroupItem" parameterType="com.juemuel.trend.pojo.GroupItem">
@@ -36,24 +37,44 @@
         </set>
         WHERE id = #{id}
     </update>
+
+    <!-- 根据组id返回组信息-->
+    <select id="selectByGroupId" resultMap="GroupItemResultMap">
+        SELECT *
+        FROM group_item
+        WHERE group_id = #{groupId}
+          AND is_active = TRUE
+    </select>
     <!-- 根据标签搜索组元素-->
     <select id="selectItemsByTags" resultMap="GroupItemResultMap">
         SELECT gi.*
         FROM group_item gi
-        INNER JOIN item_tag it ON gi.id = it.item_id
-        INNER JOIN tag t ON it.tag_id = t.id
+        LEFT JOIN item_tag it ON gi.id = it.item_id
+        LEFT JOIN tag t ON it.tag_id = t.id
         WHERE gi.group_id = #{groupId}
         AND gi.is_active = TRUE
-        AND t.name IN
-        <foreach item="tag" collection="tags" open="(" separator="," close=")">
-            #{tag}
-        </foreach>
-        <if test="keyword != null">
-            AND (gi.name LIKE CONCAT('%', #{keyword}, '%')
-            OR gi.notes LIKE CONCAT('%', #{keyword}, '%'))
+
+        <!-- 只有 tags 非空时才会拼接 -->
+        <if test="tags != null and !tags.isEmpty()">
+            AND t.name IN
+            <foreach item="tag" collection="tags" open="(" separator="," close=")">
+                #{tag}
+            </foreach>
         </if>
+
+        <!-- keyword 匹配 -->
+        <if test="keyword != null">
+            AND (
+            gi.name LIKE CONCAT('%', #{keyword}, '%')
+            OR gi.notes LIKE CONCAT('%', #{keyword}, '%')
+            OR JSON_UNQUOTE(JSON_EXTRACT(custom_data, '$.code')) LIKE CONCAT('%', #{keyword}, '%')
+            OR JSON_UNQUOTE(JSON_EXTRACT(custom_data, '$.market')) LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+
         ORDER BY gi.sort_order ASC
     </select>
+
     <!-- 查询元素的标签（供 collection 使用） -->
     <select id="selectTagsByItemId" resultMap="TagResultMap">
         SELECT t.*

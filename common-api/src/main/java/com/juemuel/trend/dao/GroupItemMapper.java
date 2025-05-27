@@ -1,5 +1,6 @@
 package com.juemuel.trend.dao;
 
+import com.juemuel.trend.pojo.Group;
 import com.juemuel.trend.pojo.GroupItem;
 import com.juemuel.trend.pojo.Tag;
 import org.apache.ibatis.annotations.*;
@@ -67,4 +68,13 @@ public interface GroupItemMapper {
      * @return
      */
     List<Tag> selectTagsByItemId(Long itemId);
+
+
+    /**
+     * 根据组ID查询组元素（xml）
+     * @param groupId
+     * @return
+     */
+    List<GroupItem> selectByGroupId(Long groupId);
+
 }

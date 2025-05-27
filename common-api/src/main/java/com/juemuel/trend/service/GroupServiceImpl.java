@@ -9,6 +9,8 @@ import com.juemuel.trend.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -56,16 +58,31 @@ public class GroupServiceImpl implements GroupService {
     }
 
     /**
-     * 获取分组列表（不含分组子项)
+     * 获取用户的分组列表，包含分组下的items
      * @param userId
      * @param typeCode
+     * @param keyword
+     * @param tags
      * @return
      */
     @Override
-    public List<Group> getUserGroups(Long userId, String typeCode) {
-        return groupMapper.selectGroupsByUser(userId, typeCode);
+    public List<Group> getGroupsWithItems(Long userId, String typeCode, String keyword, List<String> tags) {
+        List<Group> groups = groupMapper.selectGroupsByUser(userId, typeCode);
+
+        if ((keyword != null && !keyword.isEmpty()) || (tags != null && !tags.isEmpty())) {
+            for (Group group : groups) {
+                List<GroupItem> items = groupItemMapper.selectItemsByTags(group.getId(), keyword, tags);
+                group.setItems(items);
+            }
+        } else {
+            for (Group group : groups) {
+                List<GroupItem> items = groupItemMapper.selectByGroupId(group.getId());
+                group.setItems(items);
+            }
+        }
+
+        return groups;
     }
-    //TODO:增加一个而获取GroupsData（包含分组信息的接口）
 
     @Override
     @Transactional
@@ -94,9 +111,11 @@ public class GroupServiceImpl implements GroupService {
             }
         }
     }
-
     @Override
     public List<GroupItem> searchItems(Long groupId, String keyword, List<String> tags) {
+        if (tags == null) {
+            tags = Collections.emptyList();
+        }
         return groupItemMapper.selectItemsByTags(groupId, keyword, tags);
     }
 }

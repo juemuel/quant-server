@@ -31,7 +31,15 @@ public class JsonTypeHandler extends BaseTypeHandler<Map<String, Object>> {
 
     @Override
     public Map<String, Object> getNullableResult(ResultSet rs, String columnName) throws SQLException {
-        return parseJson(rs.getString(columnName));
+        String json = rs.getString(columnName);
+        if (json == null || json.isEmpty()) {
+            return Collections.emptyMap(); // 返回空 Map 而不是抛异常
+        }
+        try {
+            return objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            throw new SQLException("Error parsing JSON from column: " + columnName, e);
+        }
     }
 
     @Override

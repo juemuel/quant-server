@@ -2,6 +2,7 @@ package com.juemuel.trend.pojo;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class Group {
     private Long id;
@@ -13,6 +14,8 @@ public class Group {
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
+    // 新增字段：嵌套 items
+    private List<GroupItem> items;
     public Long getId() {
         return id;
     }
@@ -87,5 +90,13 @@ public class Group {
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
+    }
+
+    public List<GroupItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<GroupItem> items) {
+        this.items = items;
     }
 }

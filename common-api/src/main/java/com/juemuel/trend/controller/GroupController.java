@@ -8,6 +8,7 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -39,14 +40,13 @@ public class GroupController {
     }
 
     @GetMapping("/list")
-    public Result<List<Group>> getGroupList(
+    public Result<List<Group>> getGroupsWithItems(
             @RequestParam Long userId,
-            @RequestParam(required = false) String typeCode) {
-        return Result.success(
-                groupService.getUserGroups(userId, typeCode)
-        );
+            @RequestParam(required = false) String typeCode,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) List<String> tags) {
+        return Result.success(groupService.getGroupsWithItems(userId, typeCode, keyword, tags));
     }
-
 
     // ------------------------ 元素管理 ------------------------
     @PostMapping("/item/add")
@@ -73,9 +73,10 @@ public class GroupController {
             @RequestParam Long groupId,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) List<String> tags) {
-        return Result.success(
-                groupService.searchItems(groupId, keyword, tags)
-        );
+        if (tags == null) {
+            tags = Collections.emptyList();
+        }
+        return Result.success(groupService.searchItems(groupId, keyword, tags));
     }
 
     // ------------------------ DTO定义 ------------------------
