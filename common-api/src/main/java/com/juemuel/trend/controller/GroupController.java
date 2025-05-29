@@ -1,5 +1,6 @@
 package com.juemuel.trend.controller;
 
+import com.juemuel.trend.dto.*;
 import com.juemuel.trend.http.Result;
 import com.juemuel.trend.pojo.Group;
 import com.juemuel.trend.pojo.GroupItem;
@@ -37,6 +38,10 @@ public class GroupController {
             @RequestBody GroupDeleteRequest request) {
         groupService.deleteGroup(request.getGroupId(), request.getOwnerId());
         return Result.success();
+    }
+    @PostMapping("/update")
+    public Result<Group> updateGroup(@RequestBody GroupUpdateRequest request) {
+        return Result.success(groupService.updateGroup(request));
     }
 
     @GetMapping("/list")
@@ -78,32 +83,12 @@ public class GroupController {
         }
         return Result.success(groupService.searchItems(groupId, keyword, tags));
     }
+    @PostMapping("/item/update")
+    public Result<GroupItem> updateGroupItem(@RequestBody GroupItemUpdateRequest request) {
+        return Result.success(groupService.updateGroupItem(request));
+    }
 
     // ------------------------ DTO定义 ------------------------
-    @Data
-    public static class GroupCreateRequest {
-        private String typeCode;
-        private String name;
-        private Long ownerId;
-    }
-
-    @Data
-    public static class GroupDeleteRequest {
-        private Long groupId;
-        private Long ownerId;
-    }
-
-    @Data
-    public static class GroupItemAddRequest {
-        private Long groupId;
-        private String itemName;
-        private Map<String, Object> customData;
-        private Long ownerId;
-    }
-
-    @Data
-    public static class GroupItemDeleteRequest {
-        private Long itemId;
-        private Long ownerId;
-    }
+    // 非静态内部类（不能被 Jackson 正确反序列化）
+    // 建议建立到dto包下（已转移）
 }

@@ -20,6 +20,16 @@ curl -X POST http://localhost:8031/api/common-api/group/delete ^
 -H "Content-Type: application/json" ^
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJOYW1lIjoibHZqdmppZSIsImV4cCI6MTc0ODM2MDUwMn0.R8ARQmDH4-_kCiUibE4vTICX__YJ1HZvVthRFOyIr84" ^
 -d "{\"groupId\": 1, \"ownerId\": 1}"
+# 更新分组
+curl -X POST "http://localhost:8031/api/common-api/group/update" ^
+-H "Content-Type: application/json" ^
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJOYW1lIjoibHZqdmppZSIsImV4cCI6MTc0ODM2MDUwMn0.R8ARQmDH4-_kCiUibE4vTICX__YJ1HZvVthRFOyIr84" ^
+-d '{
+  "groupId": 1,
+  "typeCode": "stock",
+  "name": "我的新股票",
+  "ownerId": 1
+}'
 
 # 获取分组列表（含分组项）
 curl -X GET "http://localhost:8031/api/common-api/group/list?userId=1&typeCode=stock" ^
@@ -35,6 +45,19 @@ curl -X POST http://localhost:8031/api/common-api/group/item/delete ^
 -H "Content-Type: application/json" ^
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJOYW1lIjoibHZqdmppZSIsImV4cCI6MTc0ODM2MDUwMn0.R8ARQmDH4-_kCiUibE4vTICX__YJ1HZvVthRFOyIr84" ^
 -d "{\"itemId\": 1, \"ownerId\": 1}"
+# 更新分组项
+curl -X POST "http://localhost:8031/api/common-api/group/item/update" ^
+-H "Content-Type: application/json" ^
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJOYW1lIjoibHZqdmppZSIsImV4cCI6MTc0ODM2MDUwMn0.R8ARQmDH4-_kCiUibE4vTICX__YJ1HZvVthRFOyIr84" ^
+-d '{
+  "groupItemId": 101,
+  "groupId": 1,
+  "notes": "这是笔记",
+  "itemName": "阿里巴巴2",
+  "customData": {"code": "BABA", "market": "US"},
+  "ownerId": 1
+}'
+
 # 根据关键词搜索分组内元素
 curl -X GET "http://localhost:8031/api/common-api/group/item/search?groupId=1&keyword=阿里" ^
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJOYW1lIjoibHZqdmppZSIsImV4cCI6MTc0ODM2MDUwMn0.R8ARQmDH4-_kCiUibE4vTICX__YJ1HZvVthRFOyIr84" ^

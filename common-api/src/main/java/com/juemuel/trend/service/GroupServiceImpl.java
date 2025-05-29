@@ -1,11 +1,15 @@
 package com.juemuel.trend.service;
+import com.juemuel.trend.controller.GroupController;
 import com.juemuel.trend.dao.GroupMapper;
 import com.juemuel.trend.dao.GroupItemMapper;
 import com.juemuel.trend.dao.GroupTypeMapper;
 import com.juemuel.trend.dao.UserDAO;
+import com.juemuel.trend.dto.*;
 import com.juemuel.trend.pojo.Group;
 import com.juemuel.trend.pojo.GroupItem;
 import com.juemuel.trend.service.GroupService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +20,7 @@ import java.util.Map;
 
 @Service
 public class GroupServiceImpl implements GroupService {
-
+    private static final Logger logger = LoggerFactory.getLogger(GroupServiceImpl.class);
     @Autowired
     private GroupMapper groupMapper;
     @Autowired
@@ -55,6 +59,21 @@ public class GroupServiceImpl implements GroupService {
         }
         group.setIsActive(false);
         int affected = groupMapper.updateGroup(group);
+    }
+    @Override
+    @Transactional
+    public Group updateGroup(GroupUpdateRequest request) {
+        Group group = groupMapper.selectGroupById(request.getGroupId());
+        if (group == null || !group.getOwnerId().equals(request.getOwnerId())) {
+            throw new RuntimeException("无权操作或分组项不存在");
+        }
+
+        // 更新字段
+        group.setTypeCode(request.getTypeCode());
+        group.setName(request.getName());
+
+        groupMapper.updateGroup(group); // 使用已有的 mapper 方法
+        return group;
     }
 
     /**
@@ -110,6 +129,26 @@ public class GroupServiceImpl implements GroupService {
                 groupItemMapper.deleteItem(itemId, ownerId);
             }
         }
+    }
+    @Override
+    @Transactional
+    public GroupItem updateGroupItem(GroupItemUpdateRequest request) {
+        GroupItem groupItem = groupItemMapper.selectItemById(request.getItemId());
+        if (groupItem == null) {
+            throw new RuntimeException("分组项不存在");
+        }
+
+        Group group = groupMapper.selectGroupById(groupItem.getGroupId());
+        if (group == null || !group.getOwnerId().equals(request.getOwnerId())) {
+            throw new RuntimeException("无权操作，不属于你的分组");
+        }
+
+        groupItem.setName(request.getItemName());
+        groupItem.setCustomData(request.getCustomData());
+        groupItem.setNotes(request.getNotes());
+
+        groupItemMapper.updateGroupItem(groupItem); // 确保已有该方法
+        return groupItem;
     }
     @Override
     public List<GroupItem> searchItems(Long groupId, String keyword, List<String> tags) {
