@@ -53,12 +53,12 @@ public class GroupServiceImpl implements GroupService {
     public void deleteGroup(Long groupId, Long ownerId) {
         Group group = groupMapper.selectGroupById(groupId);
         if (group == null || !group.getOwnerId().equals(ownerId)) {
-            String errorMsg = group == null ? "分组不存在" : "分组ownerId不匹配(期望:"+ownerId+",实际:"+group.getOwnerId()+")";
-            System.out.println("验证失败: " + errorMsg);
             throw new RuntimeException("无权操作或分组不存在");
         }
+
+        // 逻辑删除：设置 is_active = false
         group.setIsActive(false);
-        int affected = groupMapper.updateGroup(group);
+        groupMapper.updateGroup(group);
     }
     @Override
     @Transactional
@@ -123,12 +123,18 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public void deleteItem(Long itemId, Long ownerId) {
         GroupItem item = groupItemMapper.selectItemById(itemId);
-        if (item != null) {
-            Group group = groupMapper.selectGroupById(item.getGroupId());
-            if (group.getOwnerId().equals(ownerId)) {
-                groupItemMapper.deleteItem(itemId, ownerId);
-            }
+        if (item == null) {
+            throw new RuntimeException("分组项不存在");
         }
+
+        Group group = groupMapper.selectGroupById(item.getGroupId());
+        if (group == null || !group.getOwnerId().equals(ownerId)) {
+            throw new RuntimeException("无权操作或分组不属于你");
+        }
+
+        // 逻辑删除：设置 is_active = false
+        item.setIsActive(false);
+        groupItemMapper.updateGroupItem(item);
     }
     @Override
     @Transactional
