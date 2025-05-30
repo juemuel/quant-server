@@ -23,9 +23,9 @@ public class GroupController {
 
     // ------------------------ 分组管理 ------------------------
     @PostMapping("/create")
-    public Result<Group> createGroup(
+    public Result<Group> addGroup(
             @RequestBody GroupCreateRequest request) {
-        Group group = groupService.createGroup(
+        Group group = groupService.addGroup(
                 request.getTypeCode(),
                 request.getName(),
                 request.getOwnerId()
@@ -43,21 +43,20 @@ public class GroupController {
     public Result<Group> updateGroup(@RequestBody GroupUpdateRequest request) {
         return Result.success(groupService.updateGroup(request));
     }
-
     @GetMapping("/list")
-    public Result<List<Group>> getGroupsWithItems(
+    public Result<List<Group>> getGroupListWithItems(
+            @RequestParam(required = false) Long groupId,
             @RequestParam Long userId,
-            @RequestParam(required = false) String typeCode,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) List<String> tags) {
-        return Result.success(groupService.getGroupsWithItems(userId, typeCode, keyword, tags));
+            @RequestParam(required = false) String keyword) {
+        return Result.success(groupService.getGroupListWithItems(userId, groupId, keyword));
     }
+
 
     // ------------------------ 元素管理 ------------------------
     @PostMapping("/item/add")
     public Result<GroupItem> addItem(
             @RequestBody GroupItemAddRequest request) {
-        GroupItem item = groupService.addItemToGroup(
+        GroupItem item = groupService.addGroupItem(
                 request.getGroupId(),
                 request.getItemName(),
                 request.getCustomData(),
@@ -67,21 +66,10 @@ public class GroupController {
     }
 
     @PostMapping("/item/delete")
-    public Result<Void> deleteItem(
+    public Result<Void> deleteGroupItem(
             @RequestBody GroupItemDeleteRequest request) {
-        groupService.deleteItem(request.getItemId(), request.getOwnerId());
+        groupService.deleteGroupItem(request.getItemId(), request.getOwnerId());
         return Result.success();
-    }
-
-    @GetMapping("/item/search")
-    public Result<List<GroupItem>> searchItems(
-            @RequestParam Long groupId,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) List<String> tags) {
-        if (tags == null) {
-            tags = Collections.emptyList();
-        }
-        return Result.success(groupService.searchItems(groupId, keyword, tags));
     }
     @PostMapping("/item/update")
     public Result<GroupItem> updateGroupItem(@RequestBody GroupItemUpdateRequest request) {

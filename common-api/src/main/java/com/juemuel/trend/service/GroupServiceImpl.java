@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,12 +28,19 @@ public class GroupServiceImpl implements GroupService {
     private GroupItemMapper groupItemMapper;
     @Autowired
     private UserDAO userDao;
-
     @Autowired
     private GroupTypeMapper groupTypeMapper;
+
+    /**
+     * 创建分组
+     * @param typeCode
+     * @param name
+     * @param ownerId
+     * @return
+     */
     @Override
     @Transactional
-    public Group createGroup(String typeCode, String name, Long ownerId) {
+    public Group addGroup(String typeCode, String name, Long ownerId) {
         if (!userDao.existsById(ownerId)) {
             throw new IllegalArgumentException("用户不存在，ID: " + ownerId);
         }
@@ -48,6 +56,11 @@ public class GroupServiceImpl implements GroupService {
         return group;
     }
 
+    /**
+     * 删除分组
+     * @param groupId
+     * @param ownerId
+     */
     @Override
     @Transactional
     public void deleteGroup(Long groupId, Long ownerId) {
@@ -60,6 +73,12 @@ public class GroupServiceImpl implements GroupService {
         group.setIsActive(false);
         groupMapper.updateGroup(group);
     }
+
+    /**
+     * 更新分组
+     * @param request
+     * @return
+     */
     @Override
     @Transactional
     public Group updateGroup(GroupUpdateRequest request) {
@@ -77,35 +96,16 @@ public class GroupServiceImpl implements GroupService {
     }
 
     /**
-     * 获取用户的分组列表，包含分组下的items
-     * @param userId
-     * @param typeCode
-     * @param keyword
-     * @param tags
+     * 添加分组项
+     * @param groupId
+     * @param itemName
+     * @param customData
+     * @param ownerId
      * @return
      */
     @Override
-    public List<Group> getGroupsWithItems(Long userId, String typeCode, String keyword, List<String> tags) {
-        List<Group> groups = groupMapper.selectGroupsByUser(userId, typeCode);
-
-        if ((keyword != null && !keyword.isEmpty()) || (tags != null && !tags.isEmpty())) {
-            for (Group group : groups) {
-                List<GroupItem> items = groupItemMapper.selectItemsByTags(group.getId(), keyword, tags);
-                group.setItems(items);
-            }
-        } else {
-            for (Group group : groups) {
-                List<GroupItem> items = groupItemMapper.selectByGroupId(group.getId());
-                group.setItems(items);
-            }
-        }
-
-        return groups;
-    }
-
-    @Override
     @Transactional
-    public GroupItem addItemToGroup(Long groupId, String itemName, Map<String, Object> customData, Long ownerId) {
+    public GroupItem addGroupItem(Long groupId, String itemName, Map<String, Object> customData, Long ownerId) {
         Group group = groupMapper.selectGroupById(groupId);
         if (group == null || !group.getOwnerId().equals(ownerId)) {
             throw new RuntimeException("无权操作或分组不存在");
@@ -115,13 +115,20 @@ public class GroupServiceImpl implements GroupService {
         item.setGroupId(groupId);
         item.setName(itemName);
         item.setCustomData(customData);
+//        item.setIsActive(true);
+//        item.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         groupItemMapper.insertGroupItem(item);
         return item;
     }
 
+    /**
+     * 删除分组项
+     * @param itemId
+     * @param ownerId
+     */
     @Override
     @Transactional
-    public void deleteItem(Long itemId, Long ownerId) {
+    public void deleteGroupItem(Long itemId, Long ownerId) {
         GroupItem item = groupItemMapper.selectItemById(itemId);
         if (item == null) {
             throw new RuntimeException("分组项不存在");
@@ -136,6 +143,12 @@ public class GroupServiceImpl implements GroupService {
         item.setIsActive(false);
         groupItemMapper.updateGroupItem(item);
     }
+
+    /**
+     *  更新分组项
+     * @param request
+     * @return
+     */
     @Override
     @Transactional
     public GroupItem updateGroupItem(GroupItemUpdateRequest request) {
@@ -156,11 +169,33 @@ public class GroupServiceImpl implements GroupService {
         groupItemMapper.updateGroupItem(groupItem); // 确保已有该方法
         return groupItem;
     }
+
+    /**
+     * 获取用户的分组列表，包含分组下的items
+     * @param userId
+     * @param keyword
+     * @return
+     */
     @Override
-    public List<GroupItem> searchItems(Long groupId, String keyword, List<String> tags) {
-        if (tags == null) {
-            tags = Collections.emptyList();
+    public List<Group> getGroupListWithItems(Long userId, Long groupId, String keyword) {
+        // Step 1: 获取用户的分组列表
+        List<Group> groups = groupMapper.selectGroupsByUser(userId, null); // typeCode 可为 null
+        // Step 2: 根据 groupId 过滤
+        if (groupId != null) {
+            groups.removeIf(g -> !g.getId().equals(groupId));
         }
-        return groupItemMapper.selectItemsByTags(groupId, keyword, tags);
+        if (groups.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // Step 3: 批量获取每个 group 下的 items，并应用 keyword 过滤
+        for (Group group : groups) {
+            List<GroupItem> items = groupItemMapper.selectGroupItems(group.getId(), keyword);
+            if (items != null && !items.isEmpty()) {
+                group.setItems(items);
+            } else {
+                group.setItems(Collections.emptyList());
+            }
+        }
+        return groups;
     }
 }

@@ -16,16 +16,9 @@
         <!-- 关联标签（需额外查询或通过 JOIN 实现） -->
         <collection property="tags" column="id" select="selectTagsByItemId"/>
     </resultMap>
-    <!-- 标签查询映射 -->
-    <resultMap id="TagResultMap" type="com.juemuel.trend.pojo.Tag">
-        <id column="id" property="id" jdbcType="BIGINT"/>
-        <result column="name" property="name" jdbcType="VARCHAR"/>
-        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
-        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
-    </resultMap>
+    <!-- 增加组元素（注解） -->
 
-    <!-- 增删（注解）+updateGroupItem、selectItemsByTags、selectTagsByItemId（xml）+查询某个组元素（注解）   -->
-    <!-- 更新组元素 -->
+    <!-- 删除/更新组元素（xml） -->
     <update id="updateGroupItem" parameterType="com.juemuel.trend.pojo.GroupItem">
         UPDATE group_item
         <set>
@@ -38,48 +31,29 @@
         WHERE id = #{id}
     </update>
 
-    <!-- 根据组id返回组信息-->
-    <select id="selectByGroupId" resultMap="GroupItemResultMap">
+    <!-- 查询某个组元素（注解） -->
+
+    <!-- 搜索组内元素（支持关键词过滤）-->
+    <select id="selectGroupItems" resultMap="GroupItemResultMap">
         SELECT *
         FROM group_item
-        WHERE group_id = #{groupId}
-          AND is_active = TRUE
-    </select>
-    <!-- 根据标签搜索组元素-->
-    <select id="selectItemsByTags" resultMap="GroupItemResultMap">
-        SELECT gi.*
-        FROM group_item gi
-        LEFT JOIN item_tag it ON gi.id = it.item_id
-        LEFT JOIN tag t ON it.tag_id = t.id
-        WHERE gi.group_id = #{groupId}
-        AND gi.is_active = TRUE
+        WHERE is_active = TRUE
 
-        <!-- 只有 tags 非空时才会拼接 -->
-        <if test="tags != null and !tags.isEmpty()">
-            AND t.name IN
-            <foreach item="tag" collection="tags" open="(" separator="," close=")">
-                #{tag}
-            </foreach>
+        <!-- 如果传入了 groupId，按 group_id 过滤 -->
+        <if test="groupId != null">
+            AND group_id = #{groupId}
         </if>
 
-        <!-- keyword 匹配 -->
-        <if test="keyword != null">
+        <!-- 如果传入了 keyword，进行模糊匹配 -->
+        <if test="keyword != null and keyword != ''">
             AND (
-            gi.name LIKE CONCAT('%', #{keyword}, '%')
-            OR gi.notes LIKE CONCAT('%', #{keyword}, '%')
+            name LIKE CONCAT('%', #{keyword}, '%')
+            OR notes LIKE CONCAT('%', #{keyword}, '%')
             OR JSON_UNQUOTE(JSON_EXTRACT(custom_data, '$.code')) LIKE CONCAT('%', #{keyword}, '%')
             OR JSON_UNQUOTE(JSON_EXTRACT(custom_data, '$.market')) LIKE CONCAT('%', #{keyword}, '%')
             )
         </if>
 
-        ORDER BY gi.sort_order ASC
-    </select>
-
-    <!-- 查询元素的标签（供 collection 使用） -->
-    <select id="selectTagsByItemId" resultMap="TagResultMap">
-        SELECT t.*
-        FROM tag t
-                 INNER JOIN item_tag it ON t.id = it.tag_id
-        WHERE it.item_id = #{id}
+        ORDER BY sort_order ASC
     </select>
 </mapper>

@@ -17,16 +17,7 @@ public interface GroupMapper {
     int insertGroup(Group group);
 
     /**
-     * 删除分组（注解）
-     * @param groupId
-     * @param ownerId
-     * @return
-     */
-    @Delete("DELETE FROM `group` WHERE id = #{groupId} AND owner_id = #{ownerId}")
-    int deleteGroup(@Param("groupId") Long groupId, @Param("ownerId") Long ownerId);
-
-    /**
-     * 更新分组（软删除/排序）(注解）
+     * 删除/更新分组(注解）
      * @param group
      * @return
      */
@@ -43,7 +34,7 @@ public interface GroupMapper {
                                    @Param("typeCode") String typeCode);
 
     /**
-     * 根据分组ID查询分组信息（注解）
+     * 查询某一个分组（注解）
      * @param groupId
      * @return
      */

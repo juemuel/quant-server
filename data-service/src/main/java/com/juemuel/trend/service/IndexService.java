@@ -26,9 +26,11 @@ import java.util.Map;
 @CacheConfig(cacheNames="indexes")
 public class IndexService {
     private List<Index> indexes;
-    //TIPS: 实例接口的自动注入Bean的逻辑
+    //TIPS: 定义接口变量，实际上是引用类型
+    // 接口的引用，接口不能实例化对象，而接口的引用指向的是实现了接口方法的类的实例化对象
+    // TODO:通过自动注入Bean的逻辑：
     // 法1：实现类Bean可以通过@Primary注解，会优先注入
-    // 法2：实例时可以通过@Qualifier("restDataSource")指定注入的Bean，需要和Bean的@Component的name属性值一致
+    // 法2：定义接口时可以通过@Qualifier("restDataSource")指定注入的Bean，需要和Bean的@Component的name属性值一致
     // 法3：实现类Bean可以通过@ConditionalOnProperty条件注解+配置文件中配置，当配置文件中配置了该属性时，会注入对应的Bean
     // 法4：实现类Bean可以通过@Profile注解，当配置文件中配置了该属性时（环境属性），会注入对应的Bean
     // 法5：在对应的配置类@Configuration下，通过自定义的逻辑手动注入Bean + 配合配置文件
