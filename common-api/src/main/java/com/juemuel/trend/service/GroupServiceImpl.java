@@ -1,20 +1,17 @@
 package com.juemuel.trend.service;
-import com.juemuel.trend.controller.GroupController;
 import com.juemuel.trend.dao.GroupMapper;
 import com.juemuel.trend.dao.GroupItemMapper;
 import com.juemuel.trend.dao.GroupTypeMapper;
-import com.juemuel.trend.dao.UserDAO;
+import com.juemuel.trend.dao.UserMapper;
 import com.juemuel.trend.dto.*;
 import com.juemuel.trend.pojo.Group;
 import com.juemuel.trend.pojo.GroupItem;
-import com.juemuel.trend.service.GroupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +24,7 @@ public class GroupServiceImpl implements GroupService {
     @Autowired
     private GroupItemMapper groupItemMapper;
     @Autowired
-    private UserDAO userDao;
+    private UserMapper userMapper;
     @Autowired
     private GroupTypeMapper groupTypeMapper;
 
@@ -41,19 +38,26 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional
     public Group addGroup(String typeCode, String name, Long ownerId) {
-        if (!userDao.existsById(ownerId)) {
+        if (!userMapper.existsById(ownerId)) {
             throw new IllegalArgumentException("用户不存在，ID: " + ownerId);
         }
         if (!groupTypeMapper.existsByTypeCode(typeCode)) {
             throw new IllegalArgumentException("无效的typeCode: " + typeCode);
         }
+        // 新增：检查 owner + typeCode + name 是否重复
+        if (groupMapper.isGroupExists(ownerId, typeCode, name)) {
+            throw new IllegalArgumentException("该用户和分组类型下已存在同名分组: " + name);
+        }
+
         Group group = new Group();
         group.setTypeCode(typeCode);
         group.setName(name);
         group.setOwnerId(ownerId);
         group.setIsActive(true);
+
         groupMapper.insertGroup(group);
-        return group;
+        // 重新查询以获取数据库生成的 createdAt 和 updatedAt 字段
+        return groupMapper.selectGroupById(group.getId());
     }
 
     /**

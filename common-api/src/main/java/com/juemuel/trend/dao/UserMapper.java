@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import java.util.Map;
 
 @Mapper
-public interface UserDAO {
+public interface UserMapper {
     //登录，这里的loginSel对应于UserMapper.xml中的id="loginSel"方法
     /**
      * 登录

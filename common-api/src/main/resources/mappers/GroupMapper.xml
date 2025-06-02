@@ -27,4 +27,14 @@
     </select>
 
     <!-- 查询某个分组（注解） -->
+
+    <select id="isGroupExists" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1 FROM `group`
+            WHERE owner_id = #{ownerId}
+              AND type_code = #{typeCode}
+              AND name = #{name}
+              AND is_active = true
+        )
+    </select>
 </mapper>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!--DAO的路径-->
-<mapper namespace="com.juemuel.trend.dao.UserDAO">
+<mapper namespace="com.juemuel.trend.dao.UserMapper">
     <!--实体类路径 小写是数据库字段名、驼峰是对象字段名-->
     <resultMap id="BaseUserMap" type="com.juemuel.trend.pojo.User">
         <id column="id" jdbcType="BIGINT" property="id" />

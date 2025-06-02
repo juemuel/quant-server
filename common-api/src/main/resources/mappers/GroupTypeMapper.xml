@@ -11,7 +11,7 @@
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
-    <!--登录查询-->
+    <!--是否存在typeCpde-->
     <select id="existsByTypeCode" resultType="boolean">
         SELECT COUNT(1) > 0
         FROM group_type

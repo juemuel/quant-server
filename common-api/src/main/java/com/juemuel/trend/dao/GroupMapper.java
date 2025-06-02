@@ -40,4 +40,13 @@ public interface GroupMapper {
      */
     @Select("SELECT * FROM `group` WHERE id = #{groupId}")
     Group selectGroupById(Long groupId);
+
+    /**
+     * 判断分组是否存在（xml）
+     * @param ownerId
+     * @param typeCode
+     * @param name
+     * @return
+     */
+    boolean isGroupExists(Long ownerId, String typeCode, String name);
 }
