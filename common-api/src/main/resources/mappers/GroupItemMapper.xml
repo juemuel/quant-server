@@ -13,8 +13,6 @@
         <result column="is_active" property="isActive" jdbcType="BOOLEAN"/>
         <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
         <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
-        <!-- 关联标签（需额外查询或通过 JOIN 实现） -->
-        <collection property="tags" column="id" select="selectTagsByItemId"/>
     </resultMap>
     <!-- 增加组元素（注解） -->
 
@@ -55,5 +53,15 @@
         </if>
 
         ORDER BY sort_order ASC
+    </select>
+    <!-- 检查指定分组下是否存在同名 item -->
+    <select id="existsByGroupIdAndItemName" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM group_item
+            WHERE group_id = #{groupId}
+              AND name = #{itemName}
+              AND is_active = TRUE
+        )
     </select>
 </mapper>

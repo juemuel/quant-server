@@ -56,13 +56,7 @@ public class GroupController {
     @PostMapping("/item/add")
     public Result<GroupItem> addItem(
             @RequestBody GroupItemAddRequest request) {
-        GroupItem item = groupService.addGroupItem(
-                request.getGroupId(),
-                request.getItemName(),
-                request.getCustomData(),
-                request.getOwnerId()
-        );
-        return Result.success(item);
+        return Result.success(groupService.addGroupItem(request));
     }
 
     @PostMapping("/item/delete")

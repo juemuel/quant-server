@@ -12,7 +12,7 @@ public interface GroupService {
     void deleteGroup(Long groupId, Long ownerId);
     Group updateGroup(GroupUpdateRequest request);
     // 组内元素操作：增、删、查
-    GroupItem addGroupItem(Long groupId, String itemName, Map<String, Object> customData, Long ownerId);
+    GroupItem addGroupItem(GroupItemAddRequest request);
     void deleteGroupItem(Long itemId, Long ownerId);
     GroupItem updateGroupItem(GroupItemUpdateRequest request);
 

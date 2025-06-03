@@ -101,26 +101,30 @@ public class GroupServiceImpl implements GroupService {
 
     /**
      * 添加分组项
-     * @param groupId
-     * @param itemName
-     * @param customData
-     * @param ownerId
      * @return
      */
     @Override
     @Transactional
-    public GroupItem addGroupItem(Long groupId, String itemName, Map<String, Object> customData, Long ownerId) {
+    public GroupItem addGroupItem(GroupItemAddRequest request) {
+        Long groupId = request.getGroupId();
+        String itemName = request.getItemName();
+        Long ownerId = request.getOwnerId();
         Group group = groupMapper.selectGroupById(groupId);
+        // Step 1: 校验权限和分组是否存在
         if (group == null || !group.getOwnerId().equals(ownerId)) {
             throw new RuntimeException("无权操作或分组不存在");
         }
-
+        // Step 2: 检查当前分组下是否已存在同名 item
+        if (groupItemMapper.existsByGroupIdAndItemName(groupId, itemName)) {
+            throw new IllegalArgumentException("该分组下已存在同名的分组项：" + itemName);
+        }
+        // Step 3: 创建 item 并插入数据库
         GroupItem item = new GroupItem();
         item.setGroupId(groupId);
         item.setName(itemName);
-        item.setCustomData(customData);
-//        item.setIsActive(true);
-//        item.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        item.setCustomData(request.getCustomData());
+        item.setIsActive(true);
+
         groupItemMapper.insertGroupItem(item);
         return item;
     }

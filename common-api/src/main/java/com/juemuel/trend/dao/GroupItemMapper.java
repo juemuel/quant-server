@@ -9,7 +9,7 @@ import java.util.List;
 // 使用注解还是在mapper.xml中实现根据习惯来，一般简单SQL用注解（如 @Select）、复杂SQL用XML（如动态SQL）
 public interface GroupItemMapper {
     /**
-     * 增加组元素（注解）
+     * 注解增加组元素
      * @param item
      * @return
      */
@@ -19,14 +19,14 @@ public interface GroupItemMapper {
     int insertGroupItem(GroupItem item);
 
     /**
-     * 删除/更新组元素（xml）
+     * XML删除/更新组元素
      * @param item
      * @return
      */
     int updateGroupItem(GroupItem item);
 
     /**
-     * 查询某个组元素（注解）
+     * 注解查询某个组元素
      * @param itemId
      * @return
      */
@@ -34,7 +34,7 @@ public interface GroupItemMapper {
     GroupItem selectItemById(Long itemId);
 
     /**
-     * 搜索组内元素（支持关键词过滤）
+     * XML搜索组内元素（支持关键词过滤）
      * @param groupId 可选，指定组ID
      * @param keyword 可选，关键词匹配 name/notes/custom_data
      * @return
@@ -42,4 +42,11 @@ public interface GroupItemMapper {
     List<GroupItem> selectGroupItems(@Param("groupId") Long groupId,
                                      @Param("keyword") String keyword);
 
+    /**
+     * XML判断组内元素是否存在
+     * @param groupId
+     * @param itemName
+     * @return
+     */
+    boolean existsByGroupIdAndItemName(@Param("groupId") Long groupId, @Param("itemName") String itemName);
 }
