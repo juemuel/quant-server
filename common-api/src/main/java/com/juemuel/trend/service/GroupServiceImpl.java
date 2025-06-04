@@ -4,6 +4,7 @@ import com.juemuel.trend.dao.GroupItemMapper;
 import com.juemuel.trend.dao.GroupTypeMapper;
 import com.juemuel.trend.dao.UserMapper;
 import com.juemuel.trend.dto.*;
+import com.juemuel.trend.exception.DuplicateGroupItemException;
 import com.juemuel.trend.pojo.Group;
 import com.juemuel.trend.pojo.GroupItem;
 import org.slf4j.Logger;
@@ -112,11 +113,12 @@ public class GroupServiceImpl implements GroupService {
         Group group = groupMapper.selectGroupById(groupId);
         // Step 1: 校验权限和分组是否存在
         if (group == null || !group.getOwnerId().equals(ownerId)) {
-            throw new RuntimeException("无权操作或分组不存在");
+//            throw new RuntimeException("无权操作或分组不存在");
+            throw new IllegalArgumentException("该分组下已存在同名的分组项：" + itemName);
         }
         // Step 2: 检查当前分组下是否已存在同名 item
         if (groupItemMapper.existsByGroupIdAndItemName(groupId, itemName)) {
-            throw new IllegalArgumentException("该分组下已存在同名的分组项：" + itemName);
+            throw new DuplicateGroupItemException("该分组下已存在同名的分组项：" + itemName);
         }
         // Step 3: 创建 item 并插入数据库
         GroupItem item = new GroupItem();
