@@ -5,14 +5,14 @@ import lombok.Data;
 @Data
 public class Result<T> {
     private int code;    // 状态码 (200表示成功)
-    private String msg;  // 提示信息
+    private String message;  // 提示信息
     private T data;      // 响应数据
 
     // 成功响应 (带数据)
     public static <T> Result<T> success(T data) {
         Result<T> result = new Result<>();
         result.setCode(200);
-        result.setMsg("success");
+        result.setMessage("success");
         result.setData(data);
         return result;
     }
@@ -26,7 +26,7 @@ public class Result<T> {
     public static <T> Result<T> error(int code, String msg) {
         Result<T> result = new Result<>();
         result.setCode(code);
-        result.setMsg(msg);
+        result.setMessage(msg);
         return result;
     }
 }
