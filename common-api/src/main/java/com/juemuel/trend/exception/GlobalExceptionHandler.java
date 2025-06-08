@@ -18,6 +18,32 @@ import java.util.Optional;
 public class GlobalExceptionHandler {
 
     /**
+     * 拦截自定义业务异常（基类）
+     */
+    @ExceptionHandler(BusinessException.class)
+    public Result<?> handleBusinessException(BusinessException ex) {
+        // 可以直接使用 BusinessException 提供的 toResult 方法返回统一结构
+        return ex.toResult();
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public Result<?> handleConflictException(ConflictException ex) {
+        log.warn("资源冲突异常：{}", ex.getMessage());
+        return Result.error(ex.getCode(), ex.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public Result<?> handleNotFoundException(NotFoundException ex) {
+        log.warn("资源未找到：{}", ex.getMessage());
+        return Result.error(ex.getCode(), ex.getMessage());
+    }
+    @ExceptionHandler(PermissionDeniedException.class)
+    public Result<?> handlePermissionDeniedException(PermissionDeniedException ex) {
+        log.warn("权限不足：{}", ex.getMessage());
+        return Result.error(ex.getCode(), ex.getMessage());
+    }
+
+    /**
      * 拦截参数校验异常（如 @Valid 注解触发的异常）
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -31,15 +57,6 @@ public class GlobalExceptionHandler {
 
         log.warn("参数校验失败：{}", errorMessage);
         return Result.error(400, errorMessage);
-    }
-
-    /**
-     * 拦截自定义业务异常：如“分组项已存在”
-     */
-    @ExceptionHandler(DuplicateGroupItemException.class)
-    public Result<?> handleDuplicateGroupItemException(DuplicateGroupItemException ex) {
-        log.warn("业务异常：{}", ex.getMessage());
-        return Result.error(409, ex.getMessage()); // 409 Conflict 表示资源冲突
     }
 
     /**
