@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static com.juemuel.trend.util.TypeUtil.parseLong;
+
 @RestController
 @CrossOrigin(allowCredentials = "true")  //支持跨域
 @RequestMapping("/group") // 统一前缀
@@ -43,12 +45,19 @@ public class GroupController {
     public Result<Group> updateGroup(@RequestBody GroupUpdateRequest request) {
         return Result.success(groupService.updateGroup(request));
     }
+
+    // TIPS: 关于请求
+    // 1. post用@RequestBody
+    // 2. get用@RequestParam，传入参数的个数默认不会验证，可以自己写验证逻辑
     @GetMapping("/list")
-    public Result<List<Group>> getGroupListWithItems(
-            @RequestParam(required = false) Long groupId,
-            @RequestParam Long userId,
-            @RequestParam(required = false) String keyword) {
-        return Result.success(groupService.getGroupListWithItems(userId, groupId, keyword));
+    public Result<List<Group>> getGroupListWithItems(@RequestParam Map<String, Object> params) {
+        System.out.println("[api] params:"+params);
+        Long userId = parseLong(params.get("userId"));
+        Long groupId = parseLong(params.get("groupId"));
+        String keyword = (String) params.get("keyword");
+        String typeCode = (String) params.get("typeCode");
+
+        return Result.success(groupService.getGroupListWithItems(userId, groupId, keyword, typeCode));
     }
 
 

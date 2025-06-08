@@ -36,7 +36,6 @@ public class UserController {
         data.put("id", user.getId());
         data.put("userName", user.getUserName());
         data.put("role", user.getRole()); // 可根据实际业务设置角色
-
         return Result.success(data);
     }
 }

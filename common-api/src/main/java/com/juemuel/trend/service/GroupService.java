@@ -16,5 +16,5 @@ public interface GroupService {
     void deleteGroupItem(Long itemId, Long ownerId);
     GroupItem updateGroupItem(GroupItemUpdateRequest request);
 
-    List<Group> getGroupListWithItems(Long userId, Long groupId, String keyword);
+    List<Group> getGroupListWithItems(Long userId, Long groupId, String keyword, String typeCode);
 }
