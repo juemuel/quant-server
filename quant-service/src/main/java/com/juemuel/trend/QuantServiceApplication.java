@@ -5,11 +5,13 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NetUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
@@ -75,6 +77,10 @@ public class QuantServiceApplication {
             System.err.printf("端口%d被占用了，无法启动%n", port );
             System.exit(1);
         }
+        ConfigurableApplicationContext context = SpringApplication.run(QuantServiceApplication.class, args);
+        String configLocation = context.getEnvironment().getProperty("config.location");
+        System.out.println("Loaded config location: " + configLocation);
+
         new SpringApplicationBuilder(QuantServiceApplication.class).properties("server.port=" + port).run(args);
     }
 }

@@ -1,10 +1,12 @@
+spring:
+  application:
+    name: quant-service
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
-spring:
-  application:
-    name: quant-service
+server:
+  port: 8051
 common:
   cache:
     redis:

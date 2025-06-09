@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 
 @RestController
+@CrossOrigin(allowCredentials = "true")  //支持跨域
 public class BackTestController {
     private static final Logger log = LoggerFactory.getLogger(BackTestController.class);
     @Autowired BackTestService backTestService;

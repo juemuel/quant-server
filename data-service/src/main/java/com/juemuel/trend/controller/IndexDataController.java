@@ -6,11 +6,13 @@ import com.juemuel.trend.config.IpConfig;
 import com.juemuel.trend.pojo.IndexData;
 import com.juemuel.trend.service.IndexDataService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@CrossOrigin(allowCredentials = "true")  //支持跨域
 public class IndexDataController {
     @Autowired
     IndexDataService indexDataService;
