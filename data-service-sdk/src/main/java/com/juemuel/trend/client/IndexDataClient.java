@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Primary
 @FeignClient(value = "DATA-SERVICE",fallback = IndexDataClientFeignHystrix.class)
 public interface IndexDataClient {
-    @GetMapping("/data/{code}")
+    // 需要和数据服务提供者的Controller方法名一致
+    @GetMapping("/getIndexData/{code}")
     public List<IndexData> getIndexData(@PathVariable("code") String code);
 }

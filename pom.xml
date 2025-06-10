@@ -25,6 +25,7 @@
 
     <module>data-service</module>
     <module>quant-service</module>
+      <module>data-service-sdk</module>
   </modules>
 
   <packaging>pom</packaging>

@@ -12,3 +12,10 @@ common:
     redis:
       time-to-live: 1800s  # 30分钟
 feign.hystrix.enabled: true
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds:5000

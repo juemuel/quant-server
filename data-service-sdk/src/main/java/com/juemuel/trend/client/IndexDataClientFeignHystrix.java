@@ -1,5 +1,6 @@
 package com.juemuel.trend.client;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.juemuel.trend.pojo.IndexData;
@@ -16,11 +17,8 @@ public class IndexDataClientFeignHystrix implements IndexDataClient {
 
     @Override
     public List<IndexData> getIndexData(String code) {
-        log.info("获取指数数据失败，服务调用异常: code={}", code);;
-        IndexData indexData = new IndexData();
-        indexData.setClosePoint(0);
-        indexData.setDate("0000-00-00");
-        return CollectionUtil.toList(indexData);
+        log.info("获取指数数据失败，服务调用异常，进入降级逻辑: code={}", code);;
+        return Collections.emptyList();
     }
 
 }
