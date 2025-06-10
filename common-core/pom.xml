@@ -28,6 +28,9 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!-- TODO:Tesseract OCR -->
+        <!-- Apache POI - Word & Excel 解析 -->
+        <!-- Apache PDFBox - PDF 解析 -->
 <!--        <dependency>-->
 <!--            <groupId>junit</groupId>-->
 <!--            <artifactId>junit</artifactId>-->
