@@ -80,7 +80,7 @@ public class IndexService {
         }
 
         // 5. 获取当前所有可用的 Index 列表
-        //tips:必须通过代理对象调用 get()
+        //tips:缓存写入后读不到的问题，必须通过代理对象调用 get()
         IndexService proxy = SpringContextUtil.getBean(IndexService.class);
         List<Index> allIndexes = proxy.get();
         if (CollUtil.isEmpty(allIndexes)) {

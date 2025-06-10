@@ -20,6 +20,7 @@ public class DebugController {
             return "缓存不存在";
         }
 
+        //tips: 荣光cacheManager获取缓存值时，需要指定缓存key的名字
         Object value = cache.get("all_codes", Object.class);
         return "缓存值: " + (value != null ? value.toString() : "null");
     }
