@@ -23,7 +23,18 @@ public class LocalFileDataSource implements DataSource {
      */
     @Autowired
     private RestTemplate restTemplate;
-    
+    private volatile List<Index> allIndexes;
+
+    private List<Index> getCachedIndexes() {
+        if (allIndexes == null) {
+            synchronized (this) {
+                if (allIndexes == null) {
+                    allIndexes = fetchIndexes();
+                }
+            }
+        }
+        return allIndexes;
+    }
     @Override
     public List<Index> fetchIndexes() {
         try {
@@ -64,10 +75,18 @@ public class LocalFileDataSource implements DataSource {
             return null;
         }
     }
+
     @Override
-    public String getType() {
-        return "REST";
+    public boolean isCodeValid(String code) {
+        List<Index> indexes = getCachedIndexes(); // 已经是从 codes.json 获取的数据
+        return indexes != null && indexes.stream().anyMatch(index -> index.getCode().equals(code));
     }
+
+    @Override
+    public String getCurrentSourceType() {
+        return "local-file";
+    }
+
     
     private List<Index> map2Index(List<Map> temp) {
         return temp.stream()

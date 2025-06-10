@@ -35,15 +35,14 @@ public class IndexDataService {
     @HystrixCommand(fallbackMethod = "third_part_not_connected")
     @CachePut(key="'indexData-code-'+ #p0")  // 添加缓存注解到主方法
     public List<IndexData> fresh(String code) {
-        log.info("刷新指数数据: {}", code);
         remove(code);  // 先清除旧缓存
         List<IndexData> indexData = dataSource.fetchIndexData(code);
         if (indexData == null || indexData.isEmpty()) {
-            log.warn("获取到的数据为空: {}", code);
+            log.warn("定时获取指数为空: {}", code);
             return third_part_not_connected(code);
         }
         indexDatas.put(code, indexData);
-        log.info("刷新指数数据成功: {}", code);
+        log.info("定时刷新指数成功: {}", code);
         return indexData;  // 直接返回数据，不再调用store
     }
 

@@ -18,8 +18,12 @@ public interface DataSource {
     List<IndexData> fetchIndexData(String code);
 
     /**
-     *
-     * @return
+     * 判断是否包含指定的指数代码
      */
-    String getType();
+    boolean isCodeValid(String code);
+
+    /**
+     * 获取当前数据源类型
+     */
+    String getCurrentSourceType();
 }

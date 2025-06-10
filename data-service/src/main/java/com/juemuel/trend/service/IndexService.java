@@ -10,13 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 从三方获取并存入到数据库中
@@ -37,15 +37,111 @@ public class IndexService {
     @Autowired
     private DataSource dataSource;
 
-    @CacheEvict(allEntries=true)
-    public void remove(){
-        log.info("清除指数代码缓存");
+    /**
+     * 检查指数代码是否存在
+     * @param code
+     * @return
+     */
+    public boolean checkCodeExists(String code) {
+        return dataSource.isCodeValid(code);
     }
 
-    @Cacheable(key="'all_codes'")
-    public List<Index> store(){
-        log.info("存储指数代码");
+    /**
+     * 解析指数代码
+     * @param input
+     * @return
+     */
+    public List<Index> parseIndex(String input) {
+        // 1. 空值校验
+        if (input == null || input.trim().isEmpty()) {
+            log.warn("输入为空");
+            return CollUtil.toList();
+        }
+
+        // 2. 长度校验：避免超长输入导致性能问题
+        int MAX_INPUT_LENGTH = 1000;
+        if (input.length() > MAX_INPUT_LENGTH) {
+            log.warn("输入过长: {}", input.length());
+            throw new IllegalArgumentException("输入内容过长，请控制在 " + MAX_INPUT_LENGTH + " 字符以内");
+        }
+
+        // 3. 分割并去重
+        List<String> tokens = Arrays.stream(input.split("\\s*,\\s*"))
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 4. 单个 token 的最大长度限制（如指数代码最长为6位）
+        int MAX_TOKEN_LENGTH = 20;
+        for (String token : tokens) {
+            if (token.length() > MAX_TOKEN_LENGTH) {
+                log.warn("输入项过长: {}", token);
+                throw new IllegalArgumentException("输入项过长: " + token);
+            }
+        }
+
+        // 5. 获取当前所有可用的 Index 列表
+        //tips:必须通过代理对象调用 get()
+        IndexService proxy = SpringContextUtil.getBean(IndexService.class);
+        List<Index> allIndexes = proxy.get();
+        if (CollUtil.isEmpty(allIndexes)) {
+            log.warn("Index列表为空");
+            return CollUtil.toList();
+        }
+
+        // 6. 查找匹配项：code 精确匹配，name 模糊匹配
+        return tokens.stream()
+                .map(token -> {
+                    // 先精确匹配 code
+                    for (Index index : allIndexes) {
+                        if (index.getCode().equals(token)) {
+                            return index;
+                        }
+                    }
+                    // 再模糊匹配 name
+                    for (Index index : allIndexes) {
+                        if (index.getName().contains(token)) {
+                            return index;
+                        }
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 数据源获取数据并存入缓存（先清空后缓存）
+     * @return
+     */
+    @HystrixCommand(fallbackMethod = "third_part_not_connected")
+    public List<Index> fresh() {
+        log.info("开始刷新指数数据...");
+        indexes = dataSource.fetchIndexes(); // 实际从数据源获取数据
+        if (CollUtil.isEmpty(indexes)) {
+            log.warn("数据源返回空列表，请检查 LocalFileDataSource 或 RestTemplate 是否正常工作");
+        } else {
+            log.info("成功加载 {} 个指数", indexes.size());
+        }
+        IndexService indexService = SpringContextUtil.getBean(IndexService.class);
+        indexService.removeCache(); // 清除缓存
+        return indexService.storeCache(); // 存入缓存
+    }
+    /**
+     * 存储缓存
+     * @return
+     */
+    @CachePut("indexes#all_codes")
+    public List<Index> storeCache() {
+        log.info("正在写入缓存，共 {} 个指数", indexes != null ? indexes.size() : 0);
         return indexes;
+    }
+    /**
+     * 清除缓存
+     */
+    @CacheEvict(allEntries=true)
+    public void removeCache(){
+        log.info("清除指数代码缓存");
     }
 
     /**
@@ -53,25 +149,12 @@ public class IndexService {
      * 如果没有，则执行方法体并缓存结果
      * @return
      */
-    @Cacheable(key="'all_codes'")
+    @Cacheable("indexes#all_codes")
     public List<Index> get(){
+        log.warn("缓存未命中，返回空列表");
         return CollUtil.toList();
     }
 
-    /**
-     * 会清空缓存，并强制下一次调用 get() 时重新从数据源获取最新数据
-     * @return
-     */
-
-    @HystrixCommand(fallbackMethod = "third_part_not_connected")
-    public List<Index> fresh() {
-        log.info("刷新指数代码");
-        indexes = dataSource.fetchIndexes(); // 实际从数据源获取数据
-        // SpringContextUtil.getBean 方式拿到的对象，会注入配置中对应的对象。 而new 出来就不会了。
-        IndexService indexService = SpringContextUtil.getBean(IndexService.class);
-        indexService.remove(); // 清除缓存
-        return indexService.store(); // 存入新数据到缓存
-    }
     public List<Index> third_part_not_connected(){
         log.warn("数据源连接失败，返回默认数据");
         Index index = new Index();
