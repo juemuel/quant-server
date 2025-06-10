@@ -19,7 +19,31 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 从三方获取并存入到数据库中
+ * 指数服务
+ * TIPS: 使用了SpringCache缓存、它是基于AOP实现的，AOP代理层根据注解逻辑决定是否从缓存中取数据或写入缓存
+ * 一、缓存注解
+ * @Cacheable 方法执行前检查缓存，如果命中则直接返回；否则执行方法并将结果写入缓存
+ * @CachePut 方法执行后更新缓存，不管是否有命中
+ * @CacheEvict 清除缓存
+ * @Caching 组合多个缓存操作（如同时使用 @Cacheable 和 @CacheEvict）
+ * 二、AOP：Spring 会在启动时为带有缓存注解的方法生成一个 动态代理类，所有对这些方法的调用都会先经过代理层
+ * 三、缓存key的解析方式
+ * key="'all_codes'"，字符串字面量作为 key
+ * key="#input"，使用方法参数 input 的值作为 key
+ * key="#root.methodName"，使用方法名作为 key
+ * key="T(java.util.Arrays).asList(#code, #name)"，使用组合参数作为 key
+ * 四、默认缓存实现（如果不配置redis、Redis、Ehcache、Caffeine），默认使用 SimpleCacheManager
+ * 1. SimpleCacheManager：默认的缓存管理器，使用 SimpleCacheManager 时，缓存的 key 必须是字符串
+ * 2. 检测顺序如下
+ * Generic（通用缓存）→ 如果你自己实现了 CacheManager
+ * JCache (JSR-107) → 如果引入了 javax.cache 相关依赖
+ * EhCache 2.x
+ * Hazelcast
+ * Infinispan
+ * Redis
+ * Caffeine
+ * Simple（默认内存缓存）
+ * @author Juemuel
  */
 @Service
 @Slf4j
@@ -123,6 +147,8 @@ public class IndexService {
         } else {
             log.info("成功加载 {} 个指数", indexes.size());
         }
+        //tips:关键点：只能通过代理对象调用缓存方法才能触发 AOP 拦截器！
+        // 直接调用get、removeCache等方法，不会走缓存，需要通过代理对象
         IndexService indexService = SpringContextUtil.getBean(IndexService.class);
         indexService.removeCache(); // 清除缓存
         return indexService.storeCache(); // 存入缓存
