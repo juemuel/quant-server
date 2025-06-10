@@ -3,6 +3,7 @@ package com.juemuel.trend.controller;
 import java.util.List;
 
 import com.juemuel.trend.config.IpConfig;
+import com.juemuel.trend.http.Result;
 import com.juemuel.trend.pojo.IndexData;
 import com.juemuel.trend.service.IndexDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,23 +24,31 @@ public class IndexDataController {
 //  http://127.0.0.1:8001/getIndexData/000300
 //  http://127.0.0.1:8001/removeIndexData/000300
 
+    /**
+     * 刷新指定指数代码的数据，并返回结果状态
+     */
     @GetMapping("/freshIndexData/{code}")
-    public String fresh(@PathVariable("code") String code) throws Exception {
+    public Result<String> fresh(@PathVariable("code") String code) throws Exception {
         indexDataService.fresh(code);
-        return "fresh index data successfully";
+        return Result.success("fresh index data successfully");
     }
+    /**
+     * 获取指定指数代码的数据并封装为 Result 返回
+     */
     @GetMapping("/getIndexData/{code}")
-    public List<IndexData> get(@PathVariable("code") String code) throws Exception {
-        return indexDataService.get(code);
+    public Result<List<IndexData>> get(@PathVariable("code") String code) throws Exception {
+        List<IndexData> data = indexDataService.get(code);
+        if (data == null || data.isEmpty()) {
+            return Result.error(404, "指数数据为空");
+        }
+        return Result.success(data);
     }
-    //    @GetMapping("/data/{code}")
-    //    public List<IndexData> get(@PathVariable("code") String code) throws Exception {
-    //        System.out.println("[controller]port:" + ipConfiguration.getPort());
-    //        return indexDataService.get(code);
-    //    }
+    /**
+     * 移除指定指数代码的缓存数据并返回结果状态
+     */
     @GetMapping("/removeIndexData/{code}")
-    public String remove(@PathVariable("code") String code) throws Exception {
+    public Result<String> remove(@PathVariable("code") String code) throws Exception {
         indexDataService.remove(code);
-        return "remove index data successfully";
+        return Result.success("remove index data successfully");
     }
 }

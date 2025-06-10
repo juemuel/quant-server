@@ -2,6 +2,7 @@ package com.juemuel.trend.controller;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.juemuel.trend.http.Result;
 import com.juemuel.trend.pojo.*;
 import com.juemuel.trend.service.BackTestService;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class BackTestController {
     private static final Logger log = LoggerFactory.getLogger(BackTestController.class);
     @Autowired BackTestService backTestService;
     @GetMapping("/simulate/{code}/{ma}/{buyThreshold}/{sellThreshold}/{serviceCharge}/{startDate}/{endDate}")
-    public Map<String,Object> backTest(
+    public Result<Map<String,Object>> backTest(
             @PathVariable("code") String code
             ,@PathVariable("ma") int ma
             ,@PathVariable("buyThreshold") float buyThreshold
@@ -29,26 +30,37 @@ public class BackTestController {
             ,@PathVariable("startDate") String strStartDate
             ,@PathVariable("endDate") String strEndDate
     ) throws Exception {
+        // Step1 处理指数数据
         List<IndexData> allIndexDatas = backTestService.listIndexData(code);
         if (allIndexDatas == null || allIndexDatas.isEmpty()) {
             log.info("没有获得指数回测数据");
-            return new HashMap<>();  // 返回空结果
+            return Result.error(404, "未找到该指数的数据，请检查指数代码是否正确");
         }
         String indexStartDate = allIndexDatas.get(0).getDate();
         String indexEndDate = allIndexDatas.get(allIndexDatas.size()-1).getDate();
         allIndexDatas = filterByDateRange(allIndexDatas,strStartDate, strEndDate);
+        if (allIndexDatas == null || allIndexDatas.isEmpty()) {
+            log.warn("根据日期范围过滤后，没有可用数据");
+            return Result.error(404, "指定日期范围内无数据，请调整时间范围");
+        }
+        // Step2 根据配置项计算
         float sellRate = 0.95f;
         float buyRate = 1.05f;
         Map<String,?> simulateResult= backTestService.simulate(ma,sellRate, buyRate,serviceCharge, allIndexDatas);
         List<Profit> profits = (List<Profit>) simulateResult.get("profits");
         List<Trade> trades = (List<Trade>) simulateResult.get("trades");
         List<MaData> maDatas = (List<MaData>) simulateResult.get("allMaDatas");
-        float years = backTestService.getYear(allIndexDatas);
+        float years = backTestService.getYears(allIndexDatas);
         float indexIncomeTotal = (allIndexDatas.get(allIndexDatas.size()-1).getClosePoint() - allIndexDatas.get(0).getClosePoint()) / allIndexDatas.get(0).getClosePoint();
-        float indexIncomeAnnual = (float) Math.pow(1+indexIncomeTotal, 1/years) - 1;
         float trendIncomeTotal = (profits.get(profits.size()-1).getValue() - profits.get(0).getValue()) / profits.get(0).getValue();
-        float trendIncomeAnnual = (float) Math.pow(1+trendIncomeTotal, 1/years) - 1;
-
+        float indexIncomeAnnual = 0;
+        float trendIncomeAnnual = 0;
+        if (years > 0) {
+            indexIncomeAnnual = (float) Math.pow(1 + indexIncomeTotal, 1 / years) - 1;
+            trendIncomeAnnual = (float) Math.pow(1 + trendIncomeTotal, 1 / years) - 1;
+        } else {
+            log.warn("年份为0，无法计算年化收益率");
+        }
         int winCount = (Integer) simulateResult.get("winCount");
         int lossCount = (Integer) simulateResult.get("lossCount");
         float avgWinRate = (Float) simulateResult.get("avgWinRate");
@@ -77,7 +89,7 @@ public class BackTestController {
             createTradeStasticsItem("趋势交易", winCount, lossCount, avgWinRate, avgLossRate)
         );
         result.put("tradeStastics", tradeStastics);
-        return result;
+        return Result.success(result);
     }
 
     /**

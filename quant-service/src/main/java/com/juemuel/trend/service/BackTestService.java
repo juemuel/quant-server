@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.juemuel.trend.client.IndexDataClient;
+import com.juemuel.trend.http.Result;
 import com.juemuel.trend.pojo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,19 +23,20 @@ public class BackTestService {
     IndexDataClient indexDataClient;
 
     public List<IndexData> listIndexData(String code) {
-        List<IndexData> result = indexDataClient.getIndexData(code);
-        if (result == null || result.isEmpty()) {
+        Result<List<IndexData>> response = indexDataClient.getIndexData(code);  // 修改这里
+        if (response == null || response.getData() == null || response.getData().isEmpty()) {
             log.warn("从数据源获取数据为空: code={}", code);
             return new ArrayList<>();
         }
-        // 检查数据有效性
-        result = result.stream()
+        List<IndexData> result = response.getData()
+                .stream()
                 .filter(data -> data != null && data.getDate() != null && !"0000-00-00".equals(data.getDate()))
                 .collect(Collectors.toList());
         log.info("有效数据: size={}", result.size());
         Collections.reverse(result);
         return result;
     }
+
     public Map<String,Object> simulate(int ma, float sellRate, float buyRate, float serviceCharge, List<IndexData> indexDatas)  {
         // 初始化利润和交易列表
         List<Profit> profits =new ArrayList<>();
@@ -280,21 +282,33 @@ public class BackTestService {
     }
 
     /**
-     * 计算当前的时间范围有多少年
+     * 计算当前的时间范围有多少年（计算起始年份和结束年份）
      * @param allIndexDatas
      * @return
      */
-    public float getYear(List<IndexData> allIndexDatas) {
-        float years;
-        String sDateStart = allIndexDatas.get(0).getDate();
-        String sDateEnd = allIndexDatas.get(allIndexDatas.size()-1).getDate();
+    public float getYears(List<IndexData> allIndexDatas) {
+        if (allIndexDatas == null || allIndexDatas.isEmpty()) {
+            log.warn("无法计算年份：数据为空");
+            return 0; // 返回默认值避免异常
+        }
+        try {
+            String sDateStart = allIndexDatas.get(0).getDate();
+            String sDateEnd = allIndexDatas.get(allIndexDatas.size() - 1).getDate();
 
-        Date dateStart = DateUtil.parse(sDateStart);
-        Date dateEnd = DateUtil.parse(sDateEnd);
+            if (StrUtil.isBlankOrUndefined(sDateStart) || StrUtil.isBlankOrUndefined(sDateEnd)) {
+                log.warn("日期字段为空，无法计算年份");
+                return 0;
+            }
 
-        long days = DateUtil.between(dateStart, dateEnd, DateUnit.DAY);
-        years = days/365f;
-        return years;
+            Date dateStart = DateUtil.parse(sDateStart);
+            Date dateEnd = DateUtil.parse(sDateEnd);
+
+            long days = DateUtil.between(dateStart, dateEnd, DateUnit.DAY);
+            return days / 365f;
+        } catch (Exception e) {
+            log.error("计算年份时发生错误", e);
+            return 0;
+        }
     }
 
     /**
