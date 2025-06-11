@@ -1,31 +1,14 @@
 package com.juemuel.trend.pojo;
 
+import lombok.Data;
+
+/**
+ * 年度收益
+ */
+@Data
 public class AnnualProfit {
-
     private int year;
-    private float indexIncome;
-    private float trendIncome;
-    public int getYear() {
-        return year;
-    }
-    public void setYear(int year) {
-        this.year = year;
-    }
-    public float getIndexIncome() {
-        return indexIncome;
-    }
-    public void setIndexIncome(float indexIncome) {
-        this.indexIncome = indexIncome;
-    }
-    public float getTrendIncome() {
-        return trendIncome;
-    }
-    public void setTrendIncome(float trendIncome) {
-        this.trendIncome = trendIncome;
-    }
-    @Override
-    public String toString() {
-        return "AnnualProfit [year=" + year + ", indexIncome=" + indexIncome + ", trendIncome=" + trendIncome + "]";
-    }
-
+    private float value; // 年度资产价值
+    private float rate; // 相对于上一次交易时的收益率
+    private float cumulativeRate; // 累计收益率（与本金相比）
 }

@@ -53,14 +53,14 @@ public class BackTestService {
 
         // Step2: 使用 IndicatorCalculator 计算指标
         Map<String, Object> result = new HashMap<>();
-
-        result.put("annual_return",
-                indicatorContext.get("annual_return").calculate(indexDatas, trades, paramMap));
-
+        // 返回交易记录
+        result.put("trades", trades);
+        // 返回交易统计
         result.put("trade_stats",
                 indicatorContext.get("trade_stats").calculate(indexDatas, trades, paramMap));
-
-        result.put("trades", trades); // 也可返回原始交易记录
+        // 返回年化收益
+        result.put("trade_profit",
+                indicatorContext.get("trade_profit").calculate(indexDatas, trades, paramMap));
         return result;
     }
     private List<List<Float>> calculateMultipleMAs(List<IndexData> indexDatas, List<Integer> maPeriods) {
@@ -92,54 +92,7 @@ public class BackTestService {
         }
         return max;
     }
-    /**
-     * 获取一年的指数投资收益
-     * @param year
-     * @param indexDatas
-     * @return
-     */
-    private float getIndexIncome(int year, List<IndexData> indexDatas) {
-        IndexData first=null;
-        IndexData last=null;
-//        log.info("getIndexIncome: {}", indexDatas);
-        for (IndexData indexData : indexDatas) {
-            String strDate = indexData.getDate();
-            if (strDate == null || "0000-00-00".equals(strDate)) {
-                log.info("无效日期：" + strDate);
-                continue;  // 跳过无效日期
-            }
-//			Date date = DateUtil.parse(strDate);
-            int currentYear = getYear(strDate);
-            if(currentYear == year) {
-                if(null==first)
-                    first = indexData;
-                last = indexData;
-            }
-        }
-        return (last.getClosePoint() - first.getClosePoint()) / first.getClosePoint();
-    }
-    /**
-     * 获取一年的趋势投资收益
-     * @param year
-     * @param profits
-     * @return
-     */
-    private float getTrendIncome(int year, List<Profit> profits) {
-        Profit first=null;
-        Profit last=null;
-        for (Profit profit : profits) {
-            String strDate = profit.getDate();
-            int currentYear = getYear(strDate);
-            if(currentYear == year) {
-                if(null==first)
-                    first = profit;
-                last = profit;
-            }
-            if(currentYear > year)
-                break;
-        }
-        return (last.getValue() - first.getValue()) / first.getValue();
-    }
+
     /**
      * 计算MA
      * @param currentIndex
@@ -156,37 +109,6 @@ public class BackTestService {
             sum += indexDatas.get(i).getClosePoint();
         }
         return sum / ma;
-    }
-
-    /**
-     * 计算完整时间范围内，每年的指数投资年收益和趋势投资年收益
-     * @param indexDatas
-     * @param profits
-     * @return
-     */
-    private List<AnnualProfit> caculateAnnualProfits(List<IndexData> indexDatas, List<Profit> profits) {
-        List<AnnualProfit> result = new ArrayList<>();
-        if (indexDatas == null || indexDatas.isEmpty() || profits == null || profits.isEmpty()) {
-            log.info("计算年度收益时数据为空 {}", indexDatas);
-            return result;
-        }
-        String strStartDate = indexDatas.get(0).getDate();
-        String strEndDate = indexDatas.get(indexDatas.size()-1).getDate();
-        Date startDate = DateUtil.parse(strStartDate);
-        Date endDate = DateUtil.parse(strEndDate);
-        int startYear = DateUtil.year(startDate);
-        int endYear = DateUtil.year(endDate);
-        for (int year =startYear; year <= endYear; year++) {
-            AnnualProfit annualProfit = new AnnualProfit();
-            annualProfit.setYear(year);
-//            System.out.println(year + ":"+indexDatas);
-            float indexIncome = getIndexIncome(year,indexDatas);
-            float trendIncome = getTrendIncome(year,profits);
-            annualProfit.setIndexIncome(indexIncome);
-            annualProfit.setTrendIncome(trendIncome);
-            result.add(annualProfit);
-        }
-        return result;
     }
 
 

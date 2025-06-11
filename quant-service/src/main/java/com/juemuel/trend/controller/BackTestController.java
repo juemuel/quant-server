@@ -22,7 +22,8 @@ import java.util.*;
 public class BackTestController {
     private static final Logger log = LoggerFactory.getLogger(BackTestController.class);
     @Autowired BackTestService backTestService;
-    //TODO: 学习上下文的使用
+
+    @Autowired
     private final StrategyContext strategyContext;
     @Autowired
     private IndicatorContext indicatorContext;
@@ -53,8 +54,13 @@ public class BackTestController {
             return Result.error(404, "指定日期范围内无数据，请调整时间范围");
         }
         // Step4: 获取并执行策略
+        log.info("当前可用策略列表：{}", strategyContext.getAll().size());
+        for (TradingStrategy s : strategyContext.getAll()) {
+            log.info("策略 Bean 名称：{}, 名称：{}", s.getClass().getSimpleName(), s.getName());
+        }
         TradingStrategy strategy = strategyContext.getStrategy(strategyName);
         if (strategy == null) {
+            log.warn("找不到策略：{}", strategyName);
             return Result.error(404, "不支持的策略：" + strategyName);
         }
         // Step5: 调用 Service 执行完整回测

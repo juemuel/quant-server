@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Component("trade_stats")
 public class TradeStatisticsCalculator implements IndicatorCalculator {
     @Override
     public String getName() {

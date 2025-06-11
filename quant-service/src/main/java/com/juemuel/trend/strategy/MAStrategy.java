@@ -6,7 +6,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-@Component
+//Tips: Bean名称规则
+// 1. 默认类名作为Bean名称MAStrategy
+// 2. 使用@Component('指定Bean名称'）
+@Component("ma_strategy")
 public class MAStrategy implements TradingStrategy  {
     @Override
     public String getName() {
