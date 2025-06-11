@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import com.juemuel.trend.client.IndexDataClient;
 import com.juemuel.trend.http.Result;
 import com.juemuel.trend.pojo.*;
+import com.juemuel.trend.strategy.TradingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,8 @@ public class BackTestService {
     private static final Logger log = LoggerFactory.getLogger(BackTestService.class);
     @Autowired
     IndexDataClient indexDataClient;
-
+    @Autowired
+    private IndicatorContext indicatorContext;
     public List<IndexData> listIndexData(String code) {
         Result<List<IndexData>> response = indexDataClient.getIndexData(code);  // 修改这里
         if (response == null || response.getData() == null || response.getData().isEmpty()) {
@@ -37,123 +39,29 @@ public class BackTestService {
         return result;
     }
 
-    public Map<String,Object> simulate(int ma, float sellRate, float buyRate, float serviceCharge, List<IndexData> indexDatas)  {
-        // 初始化利润和交易列表
-        List<Profit> profits =new ArrayList<>();
-        List<Trade> trades = new ArrayList<>();
-        List<MaData> allMaDatas = new ArrayList<>();
-        // 初始现金
-        float initCash = 1000;
-        float cash = initCash;
-        float share = 0; // 持有的股票数量
-        float value = 0;  // 当前持有资产的价值
-        // 初始化交易统计变量
-        int winCount = 0;  // 赢利次数
-        float totalWinRate = 0;  // 总赢利率
-        float avgWinRate = 0;  // 平均赢利率
-        float totalLossRate = 0;  // 总亏损率
-        int lossCount = 0;  // 亏损次数
-        float avgLossRate = 0;  // 平均亏损率
+    public Map<String, Object> simulate(int ma, float sellRate, float buyRate, float serviceCharge,
+                                        List<IndexData> indexDatas, TradingStrategy strategy) {
 
-        // 遍历所有数据
-        float init =0; // 初始化收盘价
-//        log.info("初始的indexDatas{}", indexDatas);
-        if(!indexDatas.isEmpty())
-            init = indexDatas.get(0).getClosePoint();
-        // 计算多个移动平均线
-        List<List<Float>> maLists = calculateMultipleMAs(indexDatas, Arrays.asList(10, 20, 30, 50, 100));
-        for (int i = 0; i<indexDatas.size() ; i++) {
-            // 获取当天的多个移动平均线值
-            List<Float> mAs = new ArrayList<>();
-            for (int j = 0; j < maLists.size(); j++) {
-                mAs.add(maLists.get(j).get(i));
-            }
+        // Step1: 执行策略获取交易记录
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("ma", ma);
+        paramMap.put("buyRate", buyRate);
+        paramMap.put("sellRate", sellRate);
+        paramMap.put("serviceCharge", serviceCharge);
 
-            IndexData indexData = indexDatas.get(i);
-            float closePoint = indexData.getClosePoint();
-            float avg = getMA(i, ma, indexDatas);  // 根据传入的ma，计算算法参考的移动平均线
-            float max = getMax(i, ma, indexDatas);  // 根据传入的ma，计算算法参考的最大值
-            float increase_rate = closePoint / avg;  // 上涨比例
-            float decrease_rate = closePoint / max;  // 下跌比例
-            // 操作逻辑
-            if(avg!=0) {
-                // 买入：收盘价超过买入阈值
-                if(increase_rate>buyRate  ) {
-                    if (share == 0) {  // 如果没有持股
-                        share = cash / closePoint;  // 用现金购买股票
-                        cash = 0;  // 现金清零
+        List<Trade> trades = strategy.execute(indexDatas, paramMap);
 
-                        // 创建交易记录
-                        Trade trade = new Trade();
-                        trade.setBuyDate(indexData.getDate());
-                        trade.setBuyClosePoint(indexData.getClosePoint());
-                        trade.setSellDate("n/a");
-                        trade.setSellClosePoint(0);
-                        trades.add(trade);
-                    }
-                }
-                // 卖出：收盘价低于卖出阈值
-                else if(decrease_rate<sellRate ) {
-                    if (share != 0) {  // 如果持有股票
-                        cash = closePoint * share * (1 - serviceCharge);  // 出售股票并扣除手续费
-                        share = 0;  // 清空持有的股票
+        // Step2: 使用 IndicatorCalculator 计算指标
+        Map<String, Object> result = new HashMap<>();
 
-                        // 更新最后一个交易记录
-                        Trade trade = trades.get(trades.size() - 1);
-                        trade.setSellDate(indexData.getDate());
-                        trade.setSellClosePoint(indexData.getClosePoint());
-                        float rate = cash / initCash;  // 计算收益率
-                        trade.setRate(rate);
+        result.put("annual_return",
+                indicatorContext.get("annual_return").calculate(indexDatas, trades, paramMap));
 
-                        // 计算盈亏情况
-                        if (trade.getSellClosePoint() - trade.getBuyClosePoint() > 0) {
-                            totalWinRate += (trade.getSellClosePoint() - trade.getBuyClosePoint()) / trade.getBuyClosePoint();
-                            winCount++;
-                        } else {
-                            totalLossRate += (trade.getSellClosePoint() - trade.getBuyClosePoint()) / trade.getBuyClosePoint();
-                            lossCount++;
-                        }
-                    }
-                }
-                // 不操作
-                else{
+        result.put("trade_stats",
+                indicatorContext.get("trade_stats").calculate(indexDatas, trades, paramMap));
 
-                }
-            }
-            // 计算当前持有的资产价值
-            if(share!=0) {
-                value = closePoint * share;
-            }
-            else {
-                value = cash;
-            }
-            float rate = value/initCash;
-            // 创建利润记录
-            Profit profit = new Profit();
-            profit.setDate(indexData.getDate());
-            profit.setValue(rate*init);
-            profits.add(profit);
-            // 添加 选择的MA值 到 选择MA数组中
-            List<Float> maValues = mAs;
-            MaData maData = new MaData(indexData.getDate(), maValues);
-            allMaDatas.add(maData);
-        }
-        // 计算平均赢利率和平均亏损率、年收益
-        avgWinRate = winCount > 0 ? totalWinRate / winCount : 0;
-        avgLossRate = lossCount > 0 ? totalLossRate / lossCount : 0;
-        List<AnnualProfit> annualProfits = caculateAnnualProfits(indexDatas, profits);
-
-        // 构建结果映射
-        Map<String, Object> map = new HashMap<>();
-        map.put("profits", profits);
-        map.put("trades", trades);
-        map.put("winCount", winCount);
-        map.put("lossCount", lossCount);
-        map.put("avgWinRate", avgWinRate);
-        map.put("avgLossRate", avgLossRate);
-        map.put("annualProfits", annualProfits);
-        map.put("allMaDatas", allMaDatas);
-        return map;
+        result.put("trades", trades); // 也可返回原始交易记录
+        return result;
     }
     private List<List<Float>> calculateMultipleMAs(List<IndexData> indexDatas, List<Integer> maPeriods) {
         List<List<Float>> maLists = new ArrayList<>();
@@ -281,35 +189,6 @@ public class BackTestService {
         return result;
     }
 
-    /**
-     * 计算当前的时间范围有多少年（计算起始年份和结束年份）
-     * @param allIndexDatas
-     * @return
-     */
-    public float getYears(List<IndexData> allIndexDatas) {
-        if (allIndexDatas == null || allIndexDatas.isEmpty()) {
-            log.warn("无法计算年份：数据为空");
-            return 0; // 返回默认值避免异常
-        }
-        try {
-            String sDateStart = allIndexDatas.get(0).getDate();
-            String sDateEnd = allIndexDatas.get(allIndexDatas.size() - 1).getDate();
-
-            if (StrUtil.isBlankOrUndefined(sDateStart) || StrUtil.isBlankOrUndefined(sDateEnd)) {
-                log.warn("日期字段为空，无法计算年份");
-                return 0;
-            }
-
-            Date dateStart = DateUtil.parse(sDateStart);
-            Date dateEnd = DateUtil.parse(sDateEnd);
-
-            long days = DateUtil.between(dateStart, dateEnd, DateUnit.DAY);
-            return days / 365f;
-        } catch (Exception e) {
-            log.error("计算年份时发生错误", e);
-            return 0;
-        }
-    }
 
     /**
      * 获取某日期的年份
