@@ -15,6 +15,19 @@ public class MAStrategy implements TradingStrategy  {
     public String getName() {
         return "ma_strategy";
     }
+
+    /**
+     * 策略执行函数
+     * 实际上时一个趋势投资的策略
+     * 1. 买入逻辑：突破策略，高于某均线（阈值）进场；
+     * 2. 卖出逻辑：趋势反转策略, 跌破高点（阈值）出场；
+     * TODO：加入止损机制（例如最大回撤止损）、加入仓位控制（例如每次只买 1/2 仓位）、加入复合指标判断（如 MACD、RSI）
+     * TODO：插拔动态阈值、指标策略（MA）；决策方式（简单突破、或形成、阈值）、策略类型
+     *
+     * @param indexDatas
+     * @param params
+     * @return
+     */
     @Override
     public List<Trade> execute(List<IndexData> indexDatas, Map<String, Object> params) {
         List<Trade> trades = new ArrayList<>();
