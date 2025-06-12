@@ -1,5 +1,6 @@
 package com.juemuel.trend.util;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
@@ -59,5 +60,7 @@ public class DateUtilEx {
      */
     public static int extractYear(String dateStr) {
         return Integer.parseInt(dateStr.split("-")[0]);
+//        String strYear= StrUtil.subBefore(date, "-", false);
+//        return Convert.toInt(strYear);
     }
 }

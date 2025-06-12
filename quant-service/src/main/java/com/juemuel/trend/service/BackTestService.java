@@ -8,6 +8,7 @@ import com.juemuel.trend.context.TradeContext;
 import com.juemuel.trend.http.Result;
 import com.juemuel.trend.pojo.*;
 import com.juemuel.trend.calculator.strategy.TradingStrategy;
+import com.juemuel.trend.util.DateUtilEx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,38 +46,65 @@ public class BackTestService {
 
     /**
      * TODO: 回测函数考虑异步
-     * @param ma
-     * @param sellRate
-     * @param buyRate
-     * @param serviceCharge
+     * @param params
      * @param indexDatas
      * @param strategy
      * @return
      */
-    public Map<String, Object> simulate(int ma, float sellRate, float buyRate, float serviceCharge,
-                                        List<IndexData> indexDatas, TradingStrategy strategy) {
+    public Map<String, Object> simulate(StrategyParams rawParams,
+                                        List<IndexData> indexDatas,
+                                        TradingStrategy strategy) {
 
-        // Step1: 执行策略获取交易记录
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("strategyName", strategy.getName());
-        paramMap.put("ma", ma);
-        paramMap.put("buyRate", buyRate);
-        paramMap.put("sellRate", sellRate);
-        paramMap.put("serviceCharge", serviceCharge);
 
-        List<Trade> trades = strategy.execute(indexDatas, paramMap);
-
-        // Step2: 使用 IndicatorCalculator 计算指标
+        // Step1: 执行策略（构建策略参数、策略信息，并执行策略获取交易记录）
+        Map<String, Object> strategyParams = buildStrategyParamsMap(rawParams);
+        List<Trade> trades = strategy.execute(indexDatas, strategyParams);
+        // Step2: 计算指标，构建返回内容
         Map<String, Object> result = new HashMap<>();
-        // 返回交易记录
+        // 指数信息
+        result.put("index_info", buildIndexInfo(indexDatas));
+        // 策略信息
+        result.put("strategy_info", buildStrategyInfo(strategy, rawParams));
+        // 交易记录
         result.put("trades", trades);
-        // 返回交易统计
-        result.put("trade_stats",
-                tradeContext.get("trade_stats").calculate(indexDatas, trades, paramMap));
-        // 返回年化收益
+        // 交易统计（通过交易计算器）
+        result.put("trade_stats", tradeContext.get("trade_stats").calculate(indexDatas, trades, strategyParams));
+        // 交易收益（通过交易计算器）
         result.put("trade_profit",
-                tradeContext.get("trade_profit").calculate(indexDatas, trades, paramMap));
+                tradeContext.get("trade_profit").calculate(indexDatas, trades, strategyParams));
         return result;
+    }
+
+    private Map<String, Object> buildStrategyInfo(TradingStrategy strategy, StrategyParams params) {
+        Map<String, Object> strategyInfo = new HashMap<>();
+        strategyInfo.put("strategyName", strategy.getName());
+        strategyInfo.put("parameters", buildStrategyParamsMap(params));
+        return strategyInfo;
+    }
+    private Map<String, Object> buildStrategyParamsMap(StrategyParams params) {
+        Map<String, Object> strategyParams = new HashMap<>();
+        strategyParams.put("serviceCharge", params.getServiceCharge());
+        strategyParams.put("ma", params.getMa());
+        strategyParams.put("buyRate", params.getBuyThreshold());
+        strategyParams.put("sellRate", params.getSellThreshold());
+        strategyParams.put("strategyStart", params.getStrStartDate());
+        strategyParams.put("strategyEnd", params.getStrEndDate());
+        return strategyParams;
+    }
+    private Map<String, Object> buildIndexInfo(List<IndexData> indexDatas) {
+        Map<String, Object> indexInfo = new HashMap<>();
+        if (!indexDatas.isEmpty()) {
+            String startDate = indexDatas.get(0).getDate();
+            String endDate = indexDatas.get(indexDatas.size() - 1).getDate();
+            float years = DateUtilEx.getYearsFromIndexDatas(indexDatas);
+            int totalDays = (int) (years * 365);
+            indexInfo.put("filtered_index_start", startDate);
+            indexInfo.put("filtered_index_end", endDate);
+            indexInfo.put("indexDatas", indexDatas);
+            indexInfo.put("total_days", totalDays);
+            indexInfo.put("years", years);
+        }
+        return indexInfo;
     }
     private List<List<Float>> calculateMultipleMAs(List<IndexData> indexDatas, List<Integer> maPeriods) {
         List<List<Float>> maLists = new ArrayList<>();
@@ -110,13 +138,4 @@ public class BackTestService {
 
 
 
-    /**
-     * 获取某日期的年份
-     * @param date
-     * @return
-     */
-    private int getYear(String date) {
-        String strYear= StrUtil.subBefore(date, "-", false);
-        return Convert.toInt(strYear);
-    }
 }

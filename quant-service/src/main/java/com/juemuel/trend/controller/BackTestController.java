@@ -44,8 +44,6 @@ public class BackTestController {
             return Result.error(404, "未找到该指数的数据，请检查指数代码是否正确");
         }
         // Step3: 按日期过滤
-        String indexStartDate = indexDatas.get(0).getDate();
-        String indexEndDate = indexDatas.get(indexDatas.size()-1).getDate();
         indexDatas = filterByDateRange(indexDatas, params.getStrStartDate(), params.getStrEndDate());
         if (indexDatas == null || indexDatas.isEmpty()) {
             log.warn("根据日期范围过滤后，没有可用数据");
@@ -63,10 +61,7 @@ public class BackTestController {
         }
         // Step5: 调用 Service 执行完整回测
         Map<String, Object> result = backTestService.simulate(
-                params.getMa(),
-                params.getSellThreshold(),
-                params.getBuyThreshold(),
-                params.getServiceCharge(),
+                params,
                 indexDatas,
                 strategy
         );

@@ -46,6 +46,8 @@ public class TradeStatisticsCalculator implements TradeCalculator {
         stats.put("lossCount", lossCount);
         stats.put("avgWinRate", avgWinRate);
         stats.put("avgLossRate", avgLossRate);
+        stats.put("totalTradeCount",  winCount + lossCount);
+        stats.put("winRate",  winCount / (float) (winCount + lossCount));
         return stats;
     }
 }
