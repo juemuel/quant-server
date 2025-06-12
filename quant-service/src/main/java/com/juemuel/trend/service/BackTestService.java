@@ -1,13 +1,13 @@
 package com.juemuel.trend.service;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DateUnit;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.juemuel.trend.client.IndexDataClient;
+import com.juemuel.trend.context.IndicatorContext;
+import com.juemuel.trend.context.TradeContext;
 import com.juemuel.trend.http.Result;
 import com.juemuel.trend.pojo.*;
-import com.juemuel.trend.strategy.TradingStrategy;
+import com.juemuel.trend.calculator.strategy.TradingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.juemuel.trend.util.IndexDataUtil;
 
 
 @Service
@@ -24,6 +26,8 @@ public class BackTestService {
     IndexDataClient indexDataClient;
     @Autowired
     private IndicatorContext indicatorContext;
+    @Autowired
+    private TradeContext tradeContext;
     public List<IndexData> listIndexData(String code) {
         Result<List<IndexData>> response = indexDataClient.getIndexData(code);  // 修改这里
         if (response == null || response.getData() == null || response.getData().isEmpty()) {
@@ -39,11 +43,22 @@ public class BackTestService {
         return result;
     }
 
+    /**
+     * TODO: 回测函数考虑异步
+     * @param ma
+     * @param sellRate
+     * @param buyRate
+     * @param serviceCharge
+     * @param indexDatas
+     * @param strategy
+     * @return
+     */
     public Map<String, Object> simulate(int ma, float sellRate, float buyRate, float serviceCharge,
                                         List<IndexData> indexDatas, TradingStrategy strategy) {
 
         // Step1: 执行策略获取交易记录
         Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("strategyName", strategy.getName());
         paramMap.put("ma", ma);
         paramMap.put("buyRate", buyRate);
         paramMap.put("sellRate", sellRate);
@@ -57,10 +72,10 @@ public class BackTestService {
         result.put("trades", trades);
         // 返回交易统计
         result.put("trade_stats",
-                indicatorContext.get("trade_stats").calculate(indexDatas, trades, paramMap));
+                tradeContext.get("trade_stats").calculate(indexDatas, trades, paramMap));
         // 返回年化收益
         result.put("trade_profit",
-                indicatorContext.get("trade_profit").calculate(indexDatas, trades, paramMap));
+                tradeContext.get("trade_profit").calculate(indexDatas, trades, paramMap));
         return result;
     }
     private List<List<Float>> calculateMultipleMAs(List<IndexData> indexDatas, List<Integer> maPeriods) {
@@ -68,7 +83,7 @@ public class BackTestService {
         for (int period : maPeriods) {
             List<Float> maList = new ArrayList<>();
             for (int i = 0; i < indexDatas.size(); i++) {
-                float ma = getMA(i, period, indexDatas);
+                float ma = IndexDataUtil.getMA(i, period, indexDatas);
                 maList.add(ma);
             }
             maLists.add(maList);
@@ -93,23 +108,6 @@ public class BackTestService {
         return max;
     }
 
-    /**
-     * 计算MA
-     * @param currentIndex
-     * @param ma
-     * @param indexDatas
-     * @return
-     */
-    private float getMA(int currentIndex, int ma, List<IndexData> indexDatas) {
-        if (currentIndex < ma - 1) {
-            return 0;
-        }
-        float sum = 0;
-        for (int i = currentIndex - ma + 1; i <= currentIndex; i++) {
-            sum += indexDatas.get(i).getClosePoint();
-        }
-        return sum / ma;
-    }
 
 
     /**

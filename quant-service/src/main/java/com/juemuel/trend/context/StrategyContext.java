@@ -1,11 +1,14 @@
-package com.juemuel.trend.service;
+package com.juemuel.trend.context;
 
-import com.juemuel.trend.strategy.TradingStrategy;
+import com.juemuel.trend.calculator.strategy.TradingStrategy;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * 策略的注册中心/上下文容器
+ */
 @Service
 public class StrategyContext {
 

@@ -13,4 +13,6 @@ public class Profit implements Serializable {
     private float value; // 资产价值
     private float rate;  // 收益率（相对于上一次交易时）
     private float cumulativeRate; // 累计收益率（与本金相比）
+    //TODO: 考虑补充
+    private float maxDrawdown;      // 最大回撤
 }

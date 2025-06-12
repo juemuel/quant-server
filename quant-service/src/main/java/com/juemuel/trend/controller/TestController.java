@@ -4,8 +4,8 @@ import com.juemuel.trend.client.IndexDataClient;
 import com.juemuel.trend.http.Result;
 import com.juemuel.trend.pojo.IndexData;
 import com.juemuel.trend.service.BackTestService;
-import com.juemuel.trend.service.StrategyContext;
-import com.juemuel.trend.strategy.TradingStrategy;
+import com.juemuel.trend.context.StrategyContext;
+import com.juemuel.trend.calculator.strategy.TradingStrategy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

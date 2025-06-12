@@ -1,13 +1,11 @@
-package com.juemuel.trend.indicator;
+package com.juemuel.trend.calculator.trade;
 
-import cn.hutool.core.date.DateUnit;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
 import com.juemuel.trend.pojo.AnnualProfit;
 import com.juemuel.trend.pojo.IndexData;
 import com.juemuel.trend.pojo.Profit;
 import com.juemuel.trend.pojo.Trade;
 import com.juemuel.trend.service.BackTestService;
+import com.juemuel.trend.util.DateUtilEx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +14,14 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
- * 策略交易收益计算器
+ * 交易收益计算器
  * totalRate：整体复利收益
  * annualRate: 年化收益率
  * strategyDailyProfits
  * strategyAnnualProfits
  */
 @Component("trade_profit")
-public class TradeProfitCalculator implements IndicatorCalculator {
+public class TradeProfitCalculator implements TradeCalculator {
     private static final Logger log = LoggerFactory.getLogger(BackTestService.class);
     @Autowired
     private BackTestService backTestService;
@@ -36,7 +34,7 @@ public class TradeProfitCalculator implements IndicatorCalculator {
     public Object calculate(List<IndexData> indexDatas, List<Trade> trades, Map<String, Object> params) {
         float initCash = 1000;
         float finalValue = trades.isEmpty() ? initCash : trades.get(trades.size()-1).getRate() * initCash;
-        float years = getYears(indexDatas);
+        float years = DateUtilEx.getYearsFromIndexDatas(indexDatas);
         float rate = (finalValue - initCash) / initCash; // 总收益率
         float annualRate = years > 0 ? (float)Math.pow(1 + rate, 1/years) - 1 : 0; // 年化收益率
 
@@ -118,7 +116,7 @@ public class TradeProfitCalculator implements IndicatorCalculator {
             String dateStr = profit.getDate();
             if ("0000-00-00".equals(dateStr)) continue;
 
-            int year = extractYear(dateStr);
+            int year = DateUtilEx.extractYear(dateStr);
             yearlyValues.put(year, profit.getValue()); // 覆盖写入，最终保留的是该年的最后一条记录
         }
 
@@ -145,43 +143,4 @@ public class TradeProfitCalculator implements IndicatorCalculator {
 
         return result;
     }
-
-    /**
-     * 从日期字符串中提取年份
-     * @param dateStr
-     * @return
-     */
-    private int extractYear(String dateStr) {
-        return Integer.parseInt(dateStr.split("-")[0]);
-    }
-    /**
-     * 计算当前的时间范围有多少年（计算起始年份和结束年份）
-     * @param indexDatas
-     * @return
-     */
-    public float getYears(List<IndexData> indexDatas) {
-        if (indexDatas == null || indexDatas.isEmpty()) {
-            log.warn("无法计算年份：数据为空");
-            return 0; // 返回默认值避免异常
-        }
-        try {
-            String sDateStart = indexDatas.get(0).getDate();
-            String sDateEnd = indexDatas.get(indexDatas.size() - 1).getDate();
-
-            if (StrUtil.isBlankOrUndefined(sDateStart) || StrUtil.isBlankOrUndefined(sDateEnd)) {
-                log.warn("日期字段为空，无法计算年份");
-                return 0;
-            }
-
-            Date dateStart = DateUtil.parse(sDateStart);
-            Date dateEnd = DateUtil.parse(sDateEnd);
-
-            long days = DateUtil.between(dateStart, dateEnd, DateUnit.DAY);
-            return days / 365f;
-        } catch (Exception e) {
-            log.error("计算年份时发生错误", e);
-            return 0;
-        }
-    }
-
 }

@@ -1,9 +1,13 @@
 package com.juemuel.trend.pojo;
 
 import cn.hutool.core.convert.Convert;
+import lombok.Data;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+@Data
 public class StrategyParams {
     private String code;
     private int ma;
@@ -12,6 +16,9 @@ public class StrategyParams {
     private float serviceCharge;
     private String strStartDate;
     private String strEndDate;
+    // TODO:考虑补充
+    private String strategyType;     // 策略类型
+    private List<Integer> maPeriods; // 多周期 MA
 
     // 可选参数：用于支持不同策略的扩展参数
     private Map<String, Object> extraParams = new HashMap<>();
@@ -29,30 +36,6 @@ public class StrategyParams {
         this.strEndDate = strEndDate;
     }
 
-    // Getter and Setter
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
-
-    public int getMa() { return ma; }
-    public void setMa(int ma) { this.ma = ma; }
-
-    public float getBuyThreshold() { return buyThreshold; }
-    public void setBuyThreshold(float buyThreshold) { this.buyThreshold = buyThreshold; }
-
-    public float getSellThreshold() { return sellThreshold; }
-    public void setSellThreshold(float sellThreshold) { this.sellThreshold = sellThreshold; }
-
-    public float getServiceCharge() { return serviceCharge; }
-    public void setServiceCharge(float serviceCharge) { this.serviceCharge = serviceCharge; }
-
-    public String getStrStartDate() { return strStartDate; }
-    public void setStrStartDate(String strStartDate) { this.strStartDate = strStartDate; }
-
-    public String getStrEndDate() { return strEndDate; }
-    public void setStrEndDate(String strEndDate) { this.strEndDate = strEndDate; }
-
-    public Map<String, Object> getExtraParams() { return extraParams; }
-    public void setExtraParams(Map<String, Object> extraParams) { this.extraParams = extraParams; }
 
     // 从 Map 构建 StrategyParams（适用于 @RequestParam 或 URL 参数）
     public static StrategyParams fromMap(Map<String, String> rawParams) {

@@ -1,4 +1,4 @@
-package com.juemuel.trend.strategy;
+package com.juemuel.trend.calculator.strategy;
 
 import com.juemuel.trend.pojo.IndexData;
 import com.juemuel.trend.pojo.Trade;

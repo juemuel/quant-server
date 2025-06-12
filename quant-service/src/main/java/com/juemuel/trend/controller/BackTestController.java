@@ -1,15 +1,13 @@
 package com.juemuel.trend.controller;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.juemuel.trend.http.Result;
-import com.juemuel.trend.indicator.IndicatorCalculator;
 import com.juemuel.trend.pojo.*;
 import com.juemuel.trend.service.BackTestService;
-import com.juemuel.trend.service.IndicatorContext;
-import com.juemuel.trend.service.StrategyContext;
-import com.juemuel.trend.strategy.TradingStrategy;
+import com.juemuel.trend.context.IndicatorContext;
+import com.juemuel.trend.context.StrategyContext;
+import com.juemuel.trend.calculator.strategy.TradingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

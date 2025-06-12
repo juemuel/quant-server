@@ -1,5 +1,6 @@
-package com.juemuel.trend.strategy;
+package com.juemuel.trend.calculator.strategy;
 
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.juemuel.trend.pojo.*;
 import org.springframework.stereotype.Component;
@@ -40,9 +41,6 @@ public class MAStrategy implements TradingStrategy  {
         float cash = initCash;
         float share = 0; // 持有的股票数量
         float value = 0;  // 当前持有资产的价值
-        // 初始化交易统计变量
-        float totalWinRate = 0;  // 总赢利率
-        float totalLossRate = 0;  // 总亏损率
 
         // 遍历所有数据
         float init =0; // 初始化收盘价
@@ -83,15 +81,16 @@ public class MAStrategy implements TradingStrategy  {
                         Trade trade = trades.get(trades.size() - 1);
                         trade.setSellDate(indexData.getDate());
                         trade.setSellClosePoint(indexData.getClosePoint());
-                        float rate = cash / initCash;  // 计算收益率
+                        float rate = cash / initCash;  // 计算资金回报率
                         trade.setRate(rate);
+                        float profitRate = (trade.getSellClosePoint() - trade.getBuyClosePoint()) / trade.getBuyClosePoint(); // 计算点位差回报率
+                        trade.setProfitRate(profitRate);
 
-                        // 计算盈亏情况
-                        if (trade.getSellClosePoint() - trade.getBuyClosePoint() > 0) {
-                            totalWinRate += (trade.getSellClosePoint() - trade.getBuyClosePoint()) / trade.getBuyClosePoint();
-                        } else {
-                            totalLossRate += (trade.getSellClosePoint() - trade.getBuyClosePoint()) / trade.getBuyClosePoint();
-                        }
+                        // 新增：计算持有天数
+                        Date buyDate = DateUtil.parse(trade.getBuyDate());
+                        Date sellDate = DateUtil.parse(trade.getSellDate());
+                        long holdDays = DateUtil.between(buyDate, sellDate, DateUnit.DAY);
+                        trade.setHoldDays(holdDays);
                     }
                 }
                 // 不操作
@@ -108,8 +107,6 @@ public class MAStrategy implements TradingStrategy  {
             }
         }
 
-        // 构建结果映射
-//        map.put("allMaDatas", allMaDatas);
         return trades;
     }
     /**
