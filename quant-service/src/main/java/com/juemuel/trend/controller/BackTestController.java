@@ -58,6 +58,8 @@ public class BackTestController {
         if (strategy == null) {
             log.warn("找不到策略：{}", strategyName);
             return Result.error(404, "不支持的策略：" + strategyName);
+        } else {
+            params.setStrategyName(strategyName);
         }
         // Step5: 调用 Service 执行完整回测
         Map<String, Object> result = backTestService.simulate(

@@ -1,7 +1,10 @@
 package com.juemuel.trend.pojo;
 
 import cn.hutool.core.convert.Convert;
+import com.juemuel.trend.calculator.trade.TradeStatisticsCalculator;
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +12,7 @@ import java.util.Map;
 
 @Data
 public class StrategyParams {
+    private String strategyName;
     private String code;
     private int ma;
     private float buyThreshold;
@@ -25,8 +29,9 @@ public class StrategyParams {
 
     public StrategyParams() {}
 
-    public StrategyParams(String code, int ma, float buyThreshold, float sellThreshold,
+    public StrategyParams(String strategyName, String code, int ma, float buyThreshold, float sellThreshold,
                           float serviceCharge, String strStartDate, String strEndDate) {
+        this.strategyName = strategyName;
         this.code = code;
         this.ma = ma;
         this.buyThreshold = buyThreshold;
@@ -36,10 +41,13 @@ public class StrategyParams {
         this.strEndDate = strEndDate;
     }
 
+    private static final Logger log = LoggerFactory.getLogger(StrategyParams.class);
 
     // 从 Map 构建 StrategyParams（适用于 @RequestParam 或 URL 参数）
     public static StrategyParams fromMap(Map<String, String> rawParams) {
+        log.info("[map->params]：{}",  rawParams.get("strategyName"));
         StrategyParams params = new StrategyParams();
+        params.setStrategyName(rawParams.get("strategyName"));
         params.setCode(rawParams.get("code"));
         params.setMa(Convert.toInt(rawParams.get("ma")));
         params.setBuyThreshold(Convert.toFloat(rawParams.get("buyThreshold")));
@@ -47,7 +55,6 @@ public class StrategyParams {
         params.setServiceCharge(Convert.toFloat(rawParams.get("serviceCharge")));
         params.setStrStartDate(rawParams.get("startDate"));
         params.setStrEndDate(rawParams.get("endDate"));
-
         // 其他可选参数存入 extraParams
         for (Map.Entry<String, String> entry : rawParams.entrySet()) {
             if (!entry.getKey().matches("code|ma|buyThreshold|sellThreshold|serviceCharge|startDate|endDate")) {

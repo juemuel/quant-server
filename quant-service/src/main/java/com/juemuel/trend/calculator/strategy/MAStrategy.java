@@ -3,6 +3,7 @@ package com.juemuel.trend.calculator.strategy;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.juemuel.trend.pojo.*;
+import com.juemuel.trend.util.IndexDataUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -51,7 +52,7 @@ public class MAStrategy implements TradingStrategy  {
             IndexData indexData = indexDatas.get(i);
             float closePoint = indexData.getClosePoint();
             float avg = getMA(i, ma, indexDatas);  // 根据传入的ma，计算算法参考的移动平均线
-            float max = getMax(i, ma, indexDatas);  // 根据传入的ma，计算算法参考的最大值
+            float max = IndexDataUtil.getIndexDataMax(i, ma, indexDatas);  // 根据传入的ma，计算算法参考的最大值
             float increase_rate = closePoint / avg;  // 上涨比例
             float decrease_rate = closePoint / max;  // 下跌比例
             // 操作逻辑
@@ -109,23 +110,8 @@ public class MAStrategy implements TradingStrategy  {
 
         return trades;
     }
-    /**
-     * 计算日期范围内，指数的最大值
-     * @param currentIndex
-     * @param ma
-     * @param indexDatas
-     * @return
-     */
-    private float getMax(int currentIndex, int ma, List<IndexData> indexDatas) {
-        if (currentIndex < ma - 1) {
-            return 0;
-        }
-        float max = Float.MIN_VALUE;
-        for (int i = currentIndex - ma + 1; i <= currentIndex; i++) {
-            max = Math.max(max, indexDatas.get(i).getClosePoint());
-        }
-        return max;
-    }
+
+    //TODO: 把此处的MA用MA指标代替
     /**
      * 计算MA
      * @param currentIndex

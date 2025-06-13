@@ -46,7 +46,7 @@ public class BackTestService {
 
     /**
      * TODO: 回测函数考虑异步
-     * @param params
+     * @param rawParams
      * @param indexDatas
      * @param strategy
      * @return
@@ -82,7 +82,9 @@ public class BackTestService {
         return strategyInfo;
     }
     private Map<String, Object> buildStrategyParamsMap(StrategyParams params) {
+        log.info("[params->map] params 内容: {}", params);
         Map<String, Object> strategyParams = new HashMap<>();
+        strategyParams.put("strategyName", params.getStrategyName());
         strategyParams.put("serviceCharge", params.getServiceCharge());
         strategyParams.put("ma", params.getMa());
         strategyParams.put("buyRate", params.getBuyThreshold());
@@ -106,6 +108,7 @@ public class BackTestService {
         }
         return indexInfo;
     }
+    //TODO:把计算多个MA值的逻辑迁移到MA计算器中
     private List<List<Float>> calculateMultipleMAs(List<IndexData> indexDatas, List<Integer> maPeriods) {
         List<List<Float>> maLists = new ArrayList<>();
         for (int period : maPeriods) {
@@ -118,24 +121,4 @@ public class BackTestService {
         }
         return maLists;
     }
-    /**
-     * 计算日期范围内，指数的最大值
-     * @param currentIndex
-     * @param ma
-     * @param indexDatas
-     * @return
-     */
-    private float getMax(int currentIndex, int ma, List<IndexData> indexDatas) {
-        if (currentIndex < ma - 1) {
-            return 0;
-        }
-        float max = Float.MIN_VALUE;
-        for (int i = currentIndex - ma + 1; i <= currentIndex; i++) {
-            max = Math.max(max, indexDatas.get(i).getClosePoint());
-        }
-        return max;
-    }
-
-
-
 }

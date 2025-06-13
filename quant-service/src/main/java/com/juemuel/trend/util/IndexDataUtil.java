@@ -41,5 +41,23 @@ public class IndexDataUtil {
         }
         return sum / ma;
     }
+    /**
+     * 计算日期范围内，指数的最大值
+     * @param currentIndex
+     * @param ma
+     * @param indexDatas
+     * @return
+     */
+    public static float getIndexDataMax(int currentIndex, int ma, List<IndexData> indexDatas) {
+        if (currentIndex < ma - 1) {
+            return 0;
+        }
+        float max = Float.MIN_VALUE;
+        for (int i = currentIndex - ma + 1; i <= currentIndex; i++) {
+            max = Math.max(max, indexDatas.get(i).getClosePoint());
+        }
+        return max;
+    }
+
 
 }
