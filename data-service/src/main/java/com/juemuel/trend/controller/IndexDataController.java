@@ -27,17 +27,17 @@ public class IndexDataController {
     /**
      * 刷新指定指数代码的数据，并返回结果状态
      */
-    @GetMapping("/freshIndexData/{code}")
-    public Result<String> fresh(@PathVariable("code") String code) throws Exception {
-        indexDataService.fresh(code);
+    @GetMapping("/freshIndexData/{market}/{code}")
+    public Result<String> fresh(@PathVariable("market") String market, @PathVariable("code") String code) throws Exception {
+        indexDataService.fresh(market, code);
         return Result.success("fresh index data successfully");
     }
     /**
      * 获取指定指数代码的数据并封装为 Result 返回
      */
-    @GetMapping("/getIndexData/{code}")
-    public Result<List<IndexData>> get(@PathVariable("code") String code) throws Exception {
-        List<IndexData> data = indexDataService.get(code);
+    @GetMapping("/getIndexData/{market}/{code}")
+    public Result<List<IndexData>> get(@PathVariable("market") String market, @PathVariable("code") String code) throws Exception {
+        List<IndexData> data = indexDataService.get(market, code);
         if (data == null || data.isEmpty()) {
             return Result.error(404, "指数数据为空");
         }
@@ -46,9 +46,9 @@ public class IndexDataController {
     /**
      * 移除指定指数代码的缓存数据并返回结果状态
      */
-    @GetMapping("/removeIndexData/{code}")
-    public Result<String> remove(@PathVariable("code") String code) throws Exception {
-        indexDataService.remove(code);
+    @GetMapping("/removeIndexData/{market}/{code}")
+    public Result<String> remove(@PathVariable("market") String market, @PathVariable("code") String code) throws Exception {
+        indexDataService.remove(market, code);
         return Result.success("remove index data successfully");
     }
 }

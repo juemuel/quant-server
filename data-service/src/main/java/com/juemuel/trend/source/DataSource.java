@@ -15,12 +15,12 @@ public interface DataSource {
      * @param code
      * @return
      */
-    List<IndexData> fetchIndexData(String code);
+    List<IndexData> fetchIndexData(String market, String code);
 
     /**
      * 判断是否包含指定的指数代码
      */
-    boolean isCodeValid(String code);
+    boolean isCodeValid(String market, String code);
 
     /**
      * 获取当前数据源类型

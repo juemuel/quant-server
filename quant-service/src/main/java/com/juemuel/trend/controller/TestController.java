@@ -33,11 +33,11 @@ public class TestController {
         this.strategyContext = strategyContext;
     }
 
-    @GetMapping("/test/{code}")
-    public List<IndexData> test(@PathVariable String code) {
-        Result<List<IndexData>> response = indexDataClient.getIndexData(code);  // 修改这里
+    @GetMapping("/test/{market}/{code}")
+    public List<IndexData> test(@PathVariable String market, @PathVariable String code) {
+        Result<List<IndexData>> response = indexDataClient.getIndexData(market, code);  // 修改这里
         if (response == null || response.getData() == null || response.getData().isEmpty()) {
-            log.warn("从数据源获取数据为空: code={}", code);
+            log.warn("从数据源获取数据为空: code={}", market+code);
             return new ArrayList<>();
         }
         List<IndexData> result = response.getData()

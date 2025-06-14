@@ -33,44 +33,44 @@ public class IndexDataService {
     private DataSource dataSource;  // 注入数据源
 
     @HystrixCommand(fallbackMethod = "third_part_not_connected")
-    @CachePut(key="'indexData-code-'+ #p0")  // 添加缓存注解到主方法
-    public List<IndexData> fresh(String code) {
-        remove(code);  // 先清除旧缓存
-        List<IndexData> indexData = dataSource.fetchIndexData(code);
+    @CachePut(key="'indexData-'+ #p0 + '-' + #p1")  // 添加缓存注解到主方法
+    public List<IndexData> fresh(String market, String code) {
+        remove(market, code);  // 先清除旧缓存
+        List<IndexData> indexData = dataSource.fetchIndexData(market, code);
         if (indexData == null || indexData.isEmpty()) {
-            log.warn("定时获取指数为空: {}", code);
-            return third_part_not_connected(code);
+            log.warn("定时获取指数为空: {}", market+code);
+            return third_part_not_connected(market, code);
         }
         indexDatas.put(code, indexData);
-        log.info("定时刷新指数成功: {}", code);
+        log.info("定时刷新指数成功: {}", market+code);
         return indexData;  // 直接返回数据，不再调用store
     }
 
    /**
      * 从缓存中移除指数数据
      */
-    @CacheEvict(key="'indexData-code-'+ #p0")
-    public void remove(String code) {
-        log.info("移除指数数据缓存: {}", code);
+    @CacheEvict(key="'indexData-'+ #p0 + '-' + #p1")
+    public void remove(String market, String code) {
+        log.info("移除指数数据缓存: {}", market+code);
     }
     /**
      * 获取指数数据
      */
-    @Cacheable(key="'indexData-code-'+ #p0")
-    public List<IndexData> get(String code) {
-        log.info("缓存未命中，从数据源获取指数数据: {}", code);
-        List<IndexData> data = dataSource.fetchIndexData(code);
+    @Cacheable(key="'indexData-'+ #p0 + '-' + #p1")
+    public List<IndexData> get(String market, String code) {
+        log.info("缓存未命中，从数据源获取指数数据: {}", market+code);
+        List<IndexData> data = dataSource.fetchIndexData(market, code);
         if (data == null || data.isEmpty()) {
-            log.warn("数据源返回空数据: {}", code);
-            return third_part_not_connected(code);
+            log.warn("数据源返回空数据: {}", market+code);
+            return third_part_not_connected(market, code);
         }
         return data;
     }
     /**
      * 熔断后的降级处理
      */
-    public List<IndexData> third_part_not_connected(String code) {
-        log.warn("数据源连接失败，返回默认数据: {}", code);
+    public List<IndexData> third_part_not_connected(String market, String code) {
+        log.warn("数据源连接失败，返回默认数据: {}", market+code);
         IndexData index = new IndexData();
         index.setClosePoint(0);
         index.setDate("n/a");

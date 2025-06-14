@@ -22,7 +22,7 @@ public class IndexDataSyncJob {
         System.out.println("定时启动：" + DateUtil.now());
         List<Index> indexes = indexService.fresh();
         for (Index index : indexes) {
-            indexDataService.fresh(index.getCode());
+            indexDataService.fresh(index.getMarket(), index.getCode());
         }
         System.out.println("定时结束：" + DateUtil.now());
     }

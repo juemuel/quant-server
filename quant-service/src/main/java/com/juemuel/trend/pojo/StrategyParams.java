@@ -13,6 +13,7 @@ import java.util.Map;
 @Data
 public class StrategyParams {
     private String strategyName;
+    private String market;
     private String code;
     private int ma;
     private float buyThreshold;
@@ -29,10 +30,11 @@ public class StrategyParams {
 
     public StrategyParams() {}
 
-    public StrategyParams(String strategyName, String code, int ma, float buyThreshold, float sellThreshold,
+    public StrategyParams(String strategyName, String market, String code, int ma, float buyThreshold, float sellThreshold,
                           float serviceCharge, String strStartDate, String strEndDate) {
         this.strategyName = strategyName;
         this.code = code;
+        this.market = market;
         this.ma = ma;
         this.buyThreshold = buyThreshold;
         this.sellThreshold = sellThreshold;
@@ -55,6 +57,7 @@ public class StrategyParams {
         params.setServiceCharge(Convert.toFloat(rawParams.get("serviceCharge")));
         params.setStrStartDate(rawParams.get("startDate"));
         params.setStrEndDate(rawParams.get("endDate"));
+        params.setMarket(rawParams.get("market"));
         // 其他可选参数存入 extraParams
         for (Map.Entry<String, String> entry : rawParams.entrySet()) {
             if (!entry.getKey().matches("code|ma|buyThreshold|sellThreshold|serviceCharge|startDate|endDate")) {
@@ -66,6 +69,7 @@ public class StrategyParams {
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("code", code);
+        map.put("market", market);
         map.put("ma", ma);
         map.put("buyThreshold", buyThreshold);
         map.put("sellThreshold", sellThreshold);

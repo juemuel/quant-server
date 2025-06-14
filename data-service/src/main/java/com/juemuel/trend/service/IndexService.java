@@ -66,8 +66,8 @@ public class IndexService {
      * @param code
      * @return
      */
-    public boolean checkCodeExists(String code) {
-        return dataSource.isCodeValid(code);
+    public boolean checkCodeExists(String market, String code) {
+        return dataSource.isCodeValid(market, code);
     }
 
     /**
@@ -141,11 +141,12 @@ public class IndexService {
     @HystrixCommand(fallbackMethod = "third_part_not_connected")
     public List<Index> fresh() {
         log.info("开始刷新指数数据...");
-        indexes = dataSource.fetchIndexes(); // 实际从数据源获取数据
+        indexes = dataSource.fetchIndexes(); //
         if (CollUtil.isEmpty(indexes)) {
             log.warn("数据源返回空列表，请检查 LocalFileDataSource 或 RestTemplate 是否正常工作");
         } else {
             log.info("成功加载 {} 个指数", indexes.size());
+            log.info("如下 {} ", indexes);
         }
         //tips:关键点：只能通过代理对象调用缓存方法才能触发 AOP 拦截器！
         // 直接调用get、removeCache等方法，不会走缓存，需要通过代理对象
@@ -177,8 +178,8 @@ public class IndexService {
      */
     @Cacheable("indexes#all_codes")
     public List<Index> get(){
-        log.warn("缓存未命中，返回空列表");
-        return CollUtil.toList();
+        log.warn("缓存未命中，开始刷新数据...");
+        return fresh();
     }
 
     public List<Index> third_part_not_connected(){

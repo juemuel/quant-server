@@ -38,7 +38,7 @@ public class BackTestController {
         StrategyParams params = StrategyParams.fromMap(allParams);
 
         // Step2 处理指数数据
-        List<IndexData> indexDatas = backTestService.listIndexData(params.getCode());
+        List<IndexData> indexDatas = backTestService.listIndexData(params.getMarket(), params.getCode());
         if (indexDatas == null || indexDatas.isEmpty()) {
             log.info("没有获得指数回测数据");
             return Result.error(404, "未找到该指数的数据，请检查指数代码是否正确");

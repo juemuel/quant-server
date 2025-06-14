@@ -17,8 +17,8 @@ public class IndexDataClientFeignHystrix implements IndexDataClient {
     private static final Logger log = LoggerFactory.getLogger(IndexDataClientFeignHystrix.class);
 
     @Override
-    public Result<List<IndexData>> getIndexData(String code) {
-        log.warn("获取指数数据失败，服务调用异常: code={}", code);
+    public Result<List<IndexData>> getIndexData(String market, String code) {
+        log.warn("获取指数数据失败，服务调用异常: code={}", market+code);
         return Result.error(500, "服务不可用");
     }
 

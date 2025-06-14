@@ -48,9 +48,9 @@ public class LocalFileDataSource implements DataSource {
     }
     
     @Override
-    public List<IndexData> fetchIndexData(String code) {
+    public List<IndexData> fetchIndexData(String market, String code) {
         try {
-            String url = "http://127.0.0.1:8001/indexes/" + code + ".json";
+            String url = "http://127.0.0.1:8001/indexes/"+ market + '/' + code + ".json";
             log.info("获取指数数据, URL: {}", url);
 
             // 先检查资源是否存在
@@ -77,7 +77,7 @@ public class LocalFileDataSource implements DataSource {
     }
 
     @Override
-    public boolean isCodeValid(String code) {
+    public boolean isCodeValid(String market, String code) {
         List<Index> indexes = getCachedIndexes(); // 已经是从 codes.json 获取的数据
         return indexes != null && indexes.stream().anyMatch(index -> index.getCode().equals(code));
     }
@@ -94,6 +94,10 @@ public class LocalFileDataSource implements DataSource {
                 Index index = new Index();
                 index.setCode(String.valueOf(map.get("code")));
                 index.setName(String.valueOf(map.get("name")));
+                index.setMarket(String.valueOf(map.get("market")));
+                if (index.getMarket() == null || index.getMarket().isEmpty()) {
+                    log.warn("指数数据缺少 market 字段: {}", index);
+                }
                 return index;
             })
             .collect(Collectors.toList());
@@ -104,7 +108,7 @@ public class LocalFileDataSource implements DataSource {
             .map(map -> {
                 IndexData data = new IndexData();
                 data.setDate(String.valueOf(map.get("date")));
-                data.setClosePoint(Float.parseFloat(String.valueOf(map.get("closePoint"))));
+                data.setClosePoint(Float.parseFloat(String.valueOf(map.get("closePoint")))); // 新增处理 market 字段
                 return data;
             })
             .collect(Collectors.toList());

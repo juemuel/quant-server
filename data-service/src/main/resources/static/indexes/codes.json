@@ -1,46 +1,57 @@
 [
     {
         "code": "399975",
-        "name": "证券公司"
+        "name": "证券公司",
+        "market": "SZ"
     },
     {
         "code": "000015",
-        "name": "红利指数"
+        "name": "红利指数",
+        "market": "SH"
     },
     {
         "code": "000016",
-        "name": "上证50"
+        "name": "上证50",
+        "market": "SH"
     },
     {
         "code": "399812",
-        "name": "养老产业"
+        "name": "养老产业",
+        "market": "SZ"
     },
     {
         "code": "399971",
-        "name": "中证传媒"
+        "name": "中证传媒",
+        "market": "SZ"
     },
     {
         "code": "399006",
-        "name": "创业扳指"
+        "name": "创业扳指",
+        "market": "SZ"
     },
     {
         "code": "000992",
-        "name": "全指金融"
+        "name": "全指金融",
+        "market": "SH"
     },
     {
         "code": "000991",
-        "name": "全指医药"
+        "name": "全指医药",
+        "market": "SH"
     },
     {
         "code": "000300",
-        "name": "沪深300"
+        "name": "沪深300",
+        "market": "SH"
     },
     {
         "code": "000827",
-        "name": "中证环保"
+        "name": "中证环保",
+        "market": "SH"
     },
     {
         "code": "000905",
-        "name": "中证500"
+        "name": "中证500",
+        "market": "SH"
     }
 ]

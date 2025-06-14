@@ -29,10 +29,10 @@ public class BackTestService {
     private IndicatorContext indicatorContext;
     @Autowired
     private TradeContext tradeContext;
-    public List<IndexData> listIndexData(String code) {
-        Result<List<IndexData>> response = indexDataClient.getIndexData(code);  // 修改这里
+    public List<IndexData> listIndexData(String market, String code) {
+        Result<List<IndexData>> response = indexDataClient.getIndexData(market, code);  // 修改这里
         if (response == null || response.getData() == null || response.getData().isEmpty()) {
-            log.warn("从数据源获取数据为空: code={}", code);
+            log.warn("从数据源获取数据为空: code={}", market+code);
             return new ArrayList<>();
         }
         List<IndexData> result = response.getData()
