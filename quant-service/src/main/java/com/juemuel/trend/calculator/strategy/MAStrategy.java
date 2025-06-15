@@ -2,8 +2,12 @@ package com.juemuel.trend.calculator.strategy;
 
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
+import com.juemuel.trend.calculator.position.PositionManager;
+import com.juemuel.trend.calculator.risk.RiskRule;
+import com.juemuel.trend.calculator.signal.SignalCondition;
 import com.juemuel.trend.pojo.*;
 import com.juemuel.trend.util.IndexDataUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -12,7 +16,17 @@ import java.util.*;
 // 1. 默认类名作为Bean名称MAStrategy
 // 2. 使用@Component('指定Bean名称'）
 @Component("ma_strategy")
-public class MAStrategy implements TradingStrategy  {
+public class MAStrategy implements TradingStrategy {
+
+    @Autowired
+    private SignalCondition defaultSignalCondition;
+
+    @Autowired
+    private RiskRule stopLossRule;
+
+    @Autowired
+    private PositionManager fixedPositionManager;
+
     @Override
     public String getName() {
         return "ma_strategy";
@@ -27,20 +41,28 @@ public class MAStrategy implements TradingStrategy  {
      * TODO：插拔动态阈值、指标策略（MA）；决策方式（简单突破、或形成、阈值）、策略类型
      *
      * @param indexDatas
-     * @param params
+     * @param params+新的信号、风险、仓位模块
      * @return
      */
     @Override
-    public List<Trade> execute(List<IndexData> indexDatas, Map<String, Object> params) {
+    public List<Trade> execute(
+            List<IndexData> indexDatas,
+            Map<String, Object> params,
+            SignalCondition signalCondition,
+            RiskRule riskRule,
+            PositionManager positionManager) {
         List<Trade> trades = new ArrayList<>();
-        int ma = (Integer) params.get("ma");
-        float buyRate = (Float) params.get("buyRate");
-        float sellRate = (Float) params.get("sellRate");
-        float serviceCharge = (Float) params.get("serviceCharge");
         // 初始现金
         float initCash = 1000;
         float cash = initCash;
         float share = 0; // 持有的股票数量
+
+
+        int ma = (Integer) params.get("ma");
+        float buyRate = (Float) params.get("buyRate");
+        float sellRate = (Float) params.get("sellRate");
+        float serviceCharge = (Float) params.get("serviceCharge");
+
         float value = 0;  // 当前持有资产的价值
 
         // 遍历所有数据
@@ -48,63 +70,30 @@ public class MAStrategy implements TradingStrategy  {
 //        log.info("初始的indexDatas{}", indexDatas);
         if(!indexDatas.isEmpty())
             init = indexDatas.get(0).getClosePoint();
-        for (int i = 0; i<indexDatas.size() ; i++) {
-            IndexData indexData = indexDatas.get(i);
-            float closePoint = indexData.getClosePoint();
-            float avg = getMA(i, ma, indexDatas);  // 根据传入的ma，计算算法参考的移动平均线
-            float max = IndexDataUtil.getIndexDataMax(i, ma, indexDatas);  // 根据传入的ma，计算算法参考的最大值
-            float increase_rate = closePoint / avg;  // 上涨比例
-            float decrease_rate = closePoint / max;  // 下跌比例
-            // 操作逻辑
-            if(avg!=0) {
-                // 买入：收盘价超过买入阈值
-                if(increase_rate>buyRate  ) {
-                    if (share == 0) {  // 如果没有持股
-                        share = cash / closePoint;  // 用现金购买股票
-                        cash = 0;  // 现金清零
+        for (int i = 0; i < indexDatas.size(); i++) {
+            IndexData current = indexDatas.get(i);
 
-                        // 创建交易记录
-                        Trade trade = new Trade();
-                        trade.setBuyDate(indexData.getDate());
-                        trade.setBuyClosePoint(indexData.getClosePoint());
-                        trade.setSellDate("n/a");
-                        trade.setSellClosePoint(0);
-                        trades.add(trade);
-                    }
-                }
-                // 卖出：收盘价低于卖出阈值
-                else if(decrease_rate<sellRate ) {
-                    if (share != 0) {  // 如果持有股票
-                        cash = closePoint * share * (1 - serviceCharge);  // 出售股票并扣除手续费
-                        share = 0;  // 清空持有的股票
+            // 卖出判断：是否触发风险规则或卖出信号
+            if (share > 0 && (riskRule.shouldExit(null, current) || signalCondition.isSellSignal(indexDatas, i))) {
+                cash = current.getClosePoint() * share * (1 - serviceCharge);
+                share = 0;
 
-                        // 更新最后一个交易记录
-                        Trade trade = trades.get(trades.size() - 1);
-                        trade.setSellDate(indexData.getDate());
-                        trade.setSellClosePoint(indexData.getClosePoint());
-                        float rate = cash / initCash;  // 计算资金回报率
-                        trade.setRate(rate);
-                        float profitRate = (trade.getSellClosePoint() - trade.getBuyClosePoint()) / trade.getBuyClosePoint(); // 计算点位差回报率
-                        trade.setProfitRate(profitRate);
+                Trade trade = trades.get(trades.size() - 1);
+                trade.setSellDate(current.getDate());
+                trade.setSellClosePoint(current.getClosePoint());
 
-                        // 新增：计算持有天数
-                        Date buyDate = DateUtil.parse(trade.getBuyDate());
-                        Date sellDate = DateUtil.parse(trade.getSellDate());
-                        long holdDays = DateUtil.between(buyDate, sellDate, DateUnit.DAY);
-                        trade.setHoldDays(holdDays);
-                    }
-                }
-                // 不操作
-                else{
-
-                }
+                continue;
             }
-            // 计算当前持有的资产价值
-            if(share!=0) {
-                value = closePoint * share;
-            }
-            else {
-                value = cash;
+
+            // 买入判断
+            if (share == 0 && signalCondition.isBuySignal(indexDatas, i)) {
+                share = positionManager.calculatePosition(cash, current);
+                cash -= share * current.getClosePoint();
+
+                Trade trade = new Trade();
+                trade.setBuyDate(current.getDate());
+                trade.setBuyClosePoint(current.getClosePoint());
+                trades.add(trade);
             }
         }
 
