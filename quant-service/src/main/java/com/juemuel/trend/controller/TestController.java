@@ -1,11 +1,13 @@
 package com.juemuel.trend.controller;
 
 import com.juemuel.trend.client.IndexDataClient;
+import com.juemuel.trend.context.IndicatorContext;
 import com.juemuel.trend.http.Result;
 import com.juemuel.trend.pojo.IndexData;
 import com.juemuel.trend.service.BackTestService;
 import com.juemuel.trend.context.StrategyContext;
 import com.juemuel.trend.calculator.strategy.TradingStrategy;
+import com.juemuel.trend.calculator.indicator.IndicatorCalculator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,9 @@ public class TestController {
 
     @Autowired
     private final StrategyContext strategyContext;
+
+    @Autowired
+    IndicatorContext indicatorContext;
 
     @Autowired
     IndexDataClient indexDataClient;
@@ -49,11 +54,27 @@ public class TestController {
         return result;
     }
 
+    /**
+     * 查看已注入的策略
+     * @return
+     */
     @GetMapping("/test-strategies")
     public List<String> listStrategies() {
         return strategyContext.getAll().stream()
                 .map(TradingStrategy::getName)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 查看已注入的指标计算器
+     * @return
+     */
+    @GetMapping("/test-indicators")
+    public List<String> listIndicators() {
+        return indicatorContext.getAll().stream()
+                .map(IndicatorCalculator::getName)
+                .collect(Collectors.toList());
+    }
+
 }
 
