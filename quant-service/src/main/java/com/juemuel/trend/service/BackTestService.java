@@ -6,6 +6,7 @@ import com.juemuel.trend.client.IndexDataClient;
 import com.juemuel.trend.context.IndicatorContext;
 import com.juemuel.trend.context.TradeContext;
 import com.juemuel.trend.http.Result;
+import com.juemuel.trend.model.SlippageModel;
 import com.juemuel.trend.pojo.*;
 import com.juemuel.trend.calculator.strategy.TradingStrategy;
 import com.juemuel.trend.util.DateUtilEx;
@@ -18,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.juemuel.trend.util.IndexDataUtil;
+
 
 
 @Service
@@ -55,6 +57,10 @@ public class BackTestService {
                                         List<IndexData> indexDatas,
                                         TradingStrategy strategy) {
 
+        log.info("[simulate] strategyName: {}", rawParams.getStrategyName());
+        log.info("[simulate] signalParams: {}", rawParams.getSignalParams());
+        log.info("[simulate] enablePositionManagement: {}", rawParams.isEnablePositionManagement());
+        log.info("[simulate] enableRiskManagement: {}", rawParams.isEnableRiskManagement());
 
         // Step1: 执行策略（构建策略参数、策略信息，并执行策略获取交易记录）
         Map<String, Object> strategyParams = buildStrategyParamsMap(rawParams);
@@ -121,4 +127,17 @@ public class BackTestService {
         }
         return maLists;
     }
+    private float applySlippage(float price, float slippage, SlippageModel model) {
+        switch (model) {
+            case FIXED:
+                return price * (1 + slippage);
+            case LINEAR:
+                return price * (1 + slippage * 0.5f); // 示例线性计算
+            case SQRT:
+                return price * (1 + (float)Math.sqrt(slippage));
+            default:
+                return price;
+        }
+    }
+
 }

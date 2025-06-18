@@ -10,6 +10,7 @@ import java.util.List;
 /**
  * 基于 MA 和 RSI 的默认交易信号判断器
  */
+// TODO：你可以在具体策略中根据传入的 signalParams 动态构建信号判断逻辑，比如组合 MA + RSI + MACD 多因子。
 @Component("default_signal")
 public class DefaultSignalCondition implements SignalCondition {
 

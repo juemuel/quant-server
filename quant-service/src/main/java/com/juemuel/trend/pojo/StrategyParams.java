@@ -12,21 +12,35 @@ import java.util.Map;
 
 @Data
 public class StrategyParams {
+    // 基本信息
     private String strategyName;
+    private String strategyType;     // TODO：策略类型
     private String market;
     private String code;
+    // 仓位管理
+    private boolean enablePositionManagement = false;
+    private float maxPositionsNum = 20.0f; // TODO:
+    // 风险控制
+    private boolean enableRiskManagement = false;
+    private float stopLoss = 0.08f;  // TODO: 8%
+    private float takeProfit = 0.15f; // TODO: 15%
+    // 交易执行
+    private float buyThreshold = 1.02f;
+    private float sellThreshold = 0.98f;
+    private float serviceCharge = 0.0003f;
+    private int rebalancePeriod = 20; // TODO:
+    private float stampDutyRate = 0.001f; // TODO:
+    private String slippageModel = "fixed"; // TODO:
+    private float fixedSlippage = 0.001f; // TODO:
+    // 策略信号
     private int ma;
-    private float buyThreshold;
-    private float sellThreshold;
-    private float serviceCharge;
     private String strStartDate;
     private String strEndDate;
-    // TODO:考虑补充
-    private String strategyType;     // 策略类型
-    private List<Integer> maPeriods; // 多周期 MA
-
+    private List<Integer> maPeriods; // TODO“多周期 MA
     // 可选参数：用于支持不同策略的扩展参数
     private Map<String, Object> extraParams = new HashMap<>();
+    // 策略参数：通用
+    private Map<String, Object> signalParams = new HashMap<>(); // TODO: 策略信号
 
     public StrategyParams() {}
 
@@ -50,33 +64,35 @@ public class StrategyParams {
         log.info("[map->params]：{}",  rawParams.get("strategyName"));
         StrategyParams params = new StrategyParams();
         params.setStrategyName(rawParams.get("strategyName"));
+        params.setStrategyType(rawParams.get("strategyType"));
         params.setCode(rawParams.get("code"));
-        params.setMa(Convert.toInt(rawParams.get("ma")));
+        params.setMarket(rawParams.get("market"));
+        // 仓位管理
+        params.setEnablePositionManagement(Boolean.parseBoolean(rawParams.get("enablePositionManagement")));
+        params.setMaxPositionsNum(Convert.toFloat(rawParams.get("maxPositionsNum")));
+        // 风险控制
+        params.setEnableRiskManagement(Boolean.parseBoolean(rawParams.get("enableRiskManagement")));
+        params.setStopLoss(Convert.toFloat(rawParams.get("stopLoss")));
+        params.setTakeProfit(Convert.toFloat(rawParams.get("takeProfit")));
+        // 交易执行
         params.setBuyThreshold(Convert.toFloat(rawParams.get("buyThreshold")));
         params.setSellThreshold(Convert.toFloat(rawParams.get("sellThreshold")));
         params.setServiceCharge(Convert.toFloat(rawParams.get("serviceCharge")));
+        params.setRebalancePeriod(Convert.toInt(rawParams.get("rebalancePeriod")));
+        params.setStampDutyRate(Convert.toFloat(rawParams.get("stampDutyRate")));
+        params.setSlippageModel(rawParams.get("slippageModel"));
+        params.setFixedSlippage(Convert.toFloat(rawParams.get("fixedSlippage")));
+
+
+        params.setMa(Convert.toInt(rawParams.get("ma")));
         params.setStrStartDate(rawParams.get("startDate"));
         params.setStrEndDate(rawParams.get("endDate"));
-        params.setMarket(rawParams.get("market"));
-        // 其他可选参数存入 extraParams
+        // 将未匹配的参数放入 signalParams 中供策略使用
         for (Map.Entry<String, String> entry : rawParams.entrySet()) {
-            if (!entry.getKey().matches("code|ma|buyThreshold|sellThreshold|serviceCharge|startDate|endDate")) {
-                params.getExtraParams().put(entry.getKey(), entry.getValue()); // 先不转换，由策略自己决定如何解析
+            if (!entry.getKey().matches("strategyName|code|market|enablePositionManagement|maxPositionsNum|enableRiskManagement|stopLoss|takeProfit|buyThreshold|sellThreshold|rebalancePeriod|serviceCharge|stampDutyRate|slippageModel|fixedSlippage")) {
+                params.getSignalParams().put(entry.getKey(), entry.getValue());
             }
         }
         return params;
-    }
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("code", code);
-        map.put("market", market);
-        map.put("ma", ma);
-        map.put("buyThreshold", buyThreshold);
-        map.put("sellThreshold", sellThreshold);
-        map.put("serviceCharge", serviceCharge);
-        map.put("startDate", strStartDate);
-        map.put("endDate", strEndDate);
-        map.putAll(extraParams); // 添加扩展参数
-        return map;
     }
 }

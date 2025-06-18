@@ -1,6 +1,7 @@
 package com.juemuel.trend.calculator.strategy;
 
 import com.juemuel.trend.pojo.IndexData;
+import com.juemuel.trend.pojo.StrategyParams;
 import com.juemuel.trend.pojo.Trade;
 import com.juemuel.trend.calculator.signal.SignalCondition;
 import com.juemuel.trend.calculator.risk.RiskRule;
@@ -14,7 +15,7 @@ public interface TradingStrategy {
 
     List<Trade> execute(
             List<IndexData> indexDatas,
-            Map<String, Object> params,
+            StrategyParams params,
             SignalCondition signalCondition,
             RiskRule riskRule,
             PositionManager positionManager);

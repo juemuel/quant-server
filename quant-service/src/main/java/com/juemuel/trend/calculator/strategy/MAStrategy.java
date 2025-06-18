@@ -44,62 +44,104 @@ public class MAStrategy implements TradingStrategy {
      * @param params+新的信号、风险、仓位模块
      * @return
      */
-    @Override
-    public List<Trade> execute(
-            List<IndexData> indexDatas,
-            Map<String, Object> params,
-            SignalCondition signalCondition,
-            RiskRule riskRule,
-            PositionManager positionManager) {
-        List<Trade> trades = new ArrayList<>();
-        // 初始现金
-        float initCash = 1000;
-        float cash = initCash;
-        float share = 0; // 持有的股票数量
+//    @Override
+//    public List<Trade> execute(
+//            List<IndexData> indexDatas,
+//            Map<String, Object> params,
+//            SignalCondition signalCondition,
+//            RiskRule riskRule,
+//            PositionManager positionManager) {
+//        List<Trade> trades = new ArrayList<>();
+//        // 初始现金
+//        float initCash = 1000;
+//        float cash = initCash;
+//        float share = 0; // 持有的股票数量
+//
+//
+//        int ma = (Integer) params.get("ma");
+//        float buyRate = (Float) params.get("buyRate");
+//        float sellRate = (Float) params.get("sellRate");
+//        float serviceCharge = (Float) params.get("serviceCharge");
+//
+//        float value = 0;  // 当前持有资产的价值
+//
+//        // 遍历所有数据
+//        float init =0; // 初始化收盘价
+////        log.info("初始的indexDatas{}", indexDatas);
+//        if(!indexDatas.isEmpty())
+//            init = indexDatas.get(0).getClosePoint();
+//        for (int i = 0; i < indexDatas.size(); i++) {
+//            IndexData current = indexDatas.get(i);
+//
+//            // 卖出判断：是否触发风险规则或卖出信号
+//            if (share > 0 && (riskRule.shouldExit(null, current) || signalCondition.isSellSignal(indexDatas, i))) {
+//                cash = current.getClosePoint() * share * (1 - serviceCharge);
+//                share = 0;
+//
+//                Trade trade = trades.get(trades.size() - 1);
+//                trade.setSellDate(current.getDate());
+//                trade.setSellClosePoint(current.getClosePoint());
+//
+//                continue;
+//            }
+//
+//            // 买入判断
+//            if (share == 0 && signalCondition.isBuySignal(indexDatas, i)) {
+//                share = positionManager.calculatePosition(cash, current);
+//                cash -= share * current.getClosePoint();
+//
+//                Trade trade = new Trade();
+//                trade.setBuyDate(current.getDate());
+//                trade.setBuyClosePoint(current.getClosePoint());
+//                trades.add(trade);
+//            }
+//        }
+//
+//        return trades;
+//    }
+@Override
+public List<Trade> execute(
+        List<IndexData> indexDatas,
+        StrategyParams params,
+        SignalCondition signalCondition,
+        RiskRule riskRule,
+        PositionManager positionManager) {
 
+    List<Trade> trades = new ArrayList<>();
+    float initCash = 1000;
+    float cash = initCash;
+    float share = 0;
 
-        int ma = (Integer) params.get("ma");
-        float buyRate = (Float) params.get("buyRate");
-        float sellRate = (Float) params.get("sellRate");
-        float serviceCharge = (Float) params.get("serviceCharge");
+    for (int i = 0; i < indexDatas.size(); i++) {
+        IndexData current = indexDatas.get(i);
 
-        float value = 0;  // 当前持有资产的价值
+        // 卖出判断：是否触发风险规则或卖出信号
+        if (share > 0 && (params.isEnableRiskManagement() && riskRule.shouldExit(null, current)
+                || params.isEnableSignalCondition() && signalCondition.isSellSignal(indexDatas, i))) {
 
-        // 遍历所有数据
-        float init =0; // 初始化收盘价
-//        log.info("初始的indexDatas{}", indexDatas);
-        if(!indexDatas.isEmpty())
-            init = indexDatas.get(0).getClosePoint();
-        for (int i = 0; i < indexDatas.size(); i++) {
-            IndexData current = indexDatas.get(i);
+            cash = current.getClosePoint() * share * (1 - params.getServiceCharge());
+            share = 0;
 
-            // 卖出判断：是否触发风险规则或卖出信号
-            if (share > 0 && (riskRule.shouldExit(null, current) || signalCondition.isSellSignal(indexDatas, i))) {
-                cash = current.getClosePoint() * share * (1 - serviceCharge);
-                share = 0;
-
-                Trade trade = trades.get(trades.size() - 1);
-                trade.setSellDate(current.getDate());
-                trade.setSellClosePoint(current.getClosePoint());
-
-                continue;
-            }
-
-            // 买入判断
-            if (share == 0 && signalCondition.isBuySignal(indexDatas, i)) {
-                share = positionManager.calculatePosition(cash, current);
-                cash -= share * current.getClosePoint();
-
-                Trade trade = new Trade();
-                trade.setBuyDate(current.getDate());
-                trade.setBuyClosePoint(current.getClosePoint());
-                trades.add(trade);
-            }
+            Trade trade = trades.get(trades.size() - 1);
+            trade.setSellDate(current.getDate());
+            trade.setSellClosePoint(current.getClosePoint());
+            continue;
         }
 
-        return trades;
+        // 买入判断
+        if (share == 0 && (params.isEnableSignalCondition() && signalCondition.isBuySignal(indexDatas, i))) {
+            share = positionManager.calculatePosition(cash, current);
+            cash -= share * current.getClosePoint();
+
+            Trade trade = new Trade();
+            trade.setBuyDate(current.getDate());
+            trade.setBuyClosePoint(current.getClosePoint());
+            trades.add(trade);
+        }
     }
 
+    return trades;
+}
     //TODO: 把此处的MA用MA指标代替
     /**
      * 计算MA
