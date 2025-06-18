@@ -2,9 +2,11 @@ package com.juemuel.trend.service;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
+import com.juemuel.trend.calculator.position.PositionManager;
+import com.juemuel.trend.calculator.risk.RiskRule;
+import com.juemuel.trend.calculator.signal.SignalCondition;
 import com.juemuel.trend.client.IndexDataClient;
-import com.juemuel.trend.context.IndicatorContext;
-import com.juemuel.trend.context.TradeContext;
+import com.juemuel.trend.context.*;
 import com.juemuel.trend.http.Result;
 import com.juemuel.trend.model.SlippageModel;
 import com.juemuel.trend.pojo.*;
@@ -31,6 +33,14 @@ public class BackTestService {
     private IndicatorContext indicatorContext;
     @Autowired
     private TradeContext tradeContext;
+    @Autowired
+    private StrategyContext strategyContext;
+    @Autowired
+    private SignalContext signalContext;
+    @Autowired
+    private RiskContext riskContext;
+    @Autowired
+    private PositionContext positionContext;
     public List<IndexData> listIndexData(String market, String code) {
         Result<List<IndexData>> response = indexDataClient.getIndexData(market, code);  // 修改这里
         if (response == null || response.getData() == null || response.getData().isEmpty()) {
@@ -47,38 +57,35 @@ public class BackTestService {
     }
 
     /**
-     * TODO: 回测函数考虑异步
-     * @param rawParams
-     * @param indexDatas
-     * @param strategy
-     * @return
+     * 执行完整回测逻辑，返回封装好的 Result 对象
      */
-    public Map<String, Object> simulate(StrategyParams rawParams,
-                                        List<IndexData> indexDatas,
-                                        TradingStrategy strategy) {
-
+    public Result<Map<String, Object>> simulate(StrategyParams rawParams,
+                                                List<IndexData> indexDatas,
+                                                TradingStrategy strategy) {
         log.info("[simulate] strategyName: {}", rawParams.getStrategyName());
-        log.info("[simulate] signalParams: {}", rawParams.getSignalParams());
-        log.info("[simulate] enablePositionManagement: {}", rawParams.isEnablePositionManagement());
-        log.info("[simulate] enableRiskManagement: {}", rawParams.isEnableRiskManagement());
 
-        // Step1: 执行策略（构建策略参数、策略信息，并执行策略获取交易记录）
-        Map<String, Object> strategyParams = buildStrategyParamsMap(rawParams);
-        List<Trade> trades = strategy.execute(indexDatas, strategyParams);
-        // Step2: 计算指标，构建返回内容
-        Map<String, Object> result = new HashMap<>();
-        // 指数信息
-        result.put("index_info", buildIndexInfo(indexDatas));
-        // 策略信息
-        result.put("strategy_info", buildStrategyInfo(strategy, rawParams));
-        // 交易记录
-        result.put("trades", trades);
-        // 交易统计（通过交易计算器）
-        result.put("trade_stats", tradeContext.get("trade_stats").calculate(indexDatas, trades, strategyParams));
-        // 交易收益（通过交易计算器）
-        result.put("trade_profit",
-                tradeContext.get("trade_profit").calculate(indexDatas, trades, strategyParams));
-        return result;
+        try {
+            // Step1: 获取各模块实例
+            SignalCondition signalCondition = signalContext.get(rawParams.getSignalType());
+            RiskRule riskRule = riskContext.get(rawParams.getRiskRuleType());
+            PositionManager positionManager = positionContext.get(rawParams.getPositionType());
+
+            // Step2: 执行策略获取交易记录
+            List<Trade> trades = strategy.execute(indexDatas, rawParams, signalCondition, riskRule, positionManager);
+
+            // Step3: 构建指标和收益信息
+            Map<String, Object> result = new HashMap<>();
+            result.put("index_info", buildIndexInfo(indexDatas));
+            result.put("strategy_info", buildStrategyInfo(strategy, rawParams));
+            result.put("trades", trades);
+            result.put("trade_stats", tradeContext.get("trade_stats").calculate(indexDatas, trades, buildStrategyParamsMap(rawParams)));
+            result.put("trade_profit", tradeContext.get("trade_profit").calculate(indexDatas, trades, buildStrategyParamsMap(rawParams)));
+
+            return Result.success(result);
+        } catch (Exception e) {
+            log.error("回测执行异常", e);
+            return Result.error(500, "回测执行异常：" + e.getMessage());
+        }
     }
 
     private Map<String, Object> buildStrategyInfo(TradingStrategy strategy, StrategyParams params) {

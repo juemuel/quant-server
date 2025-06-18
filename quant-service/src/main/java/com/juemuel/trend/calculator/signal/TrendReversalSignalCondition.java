@@ -5,6 +5,7 @@ import com.juemuel.trend.util.IndexDataUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 基于趋势反转的交易信号判断器
@@ -17,7 +18,18 @@ public class TrendReversalSignalCondition implements SignalCondition {
 
     @Override
     public boolean isBuySignal(List<IndexData> data, int currentIndex) {
+        return false;
+    }
+
+    @Override
+    public boolean isSellSignal(List<IndexData> data, int currentIndex) {
+        return false;
+    }
+
+    @Override
+    public boolean isBuySignal(List<IndexData> data, int currentIndex, Map<String, Object> signalParams) {
         if (currentIndex < 1) return false;
+        float buyRate = (float) signalParams.getOrDefault("buyRate", 1.05f);
 
         IndexData current = data.get(currentIndex);
         float closePoint = current.getClosePoint();
@@ -25,10 +37,10 @@ public class TrendReversalSignalCondition implements SignalCondition {
 
         return closePoint > avg && closePoint / avg >= buyRate;
     }
-
     @Override
-    public boolean isSellSignal(List<IndexData> data, int currentIndex) {
+    public boolean isSellSignal(List<IndexData> data, int currentIndex, Map<String, Object> signalParams) {
         if (currentIndex < 1) return false;
+        float sellRate = (float) signalParams.getOrDefault("sellRate", 0.95f);
 
         IndexData current = data.get(currentIndex);
         float closePoint = current.getClosePoint();
@@ -36,6 +48,7 @@ public class TrendReversalSignalCondition implements SignalCondition {
 
         return closePoint < max && closePoint / max <= sellRate;
     }
+
 
     // 支持外部配置阈值
     public void setBuyRate(float buyRate) {
