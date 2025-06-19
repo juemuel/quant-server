@@ -1,6 +1,7 @@
 package com.juemuel.trend.context;
 
 import com.juemuel.trend.calculator.strategy.TradingStrategy;
+import com.sun.org.slf4j.internal.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -13,7 +14,6 @@ import java.util.Map;
 public class StrategyContext {
 
     private final Map<String, TradingStrategy> strategies;
-
     public StrategyContext(Map<String, TradingStrategy> strategies) {
         this.strategies = strategies;
         System.out.println("Loaded strategies: " + strategies.keySet());

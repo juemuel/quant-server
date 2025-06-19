@@ -33,7 +33,6 @@ public class MAStrategy implements TradingStrategy {
      * 2. 卖出逻辑：趋势反转策略, 跌破高点（阈值）出场；
      * TODO：加入止损机制（例如最大回撤止损）、加入仓位控制（例如每次只买 1/2 仓位）、加入复合指标判断（如 MACD、RSI）
      * TODO：插拔动态阈值、指标策略（MA）；决策方式（简单突破、或形成、阈值）、策略类型
-     *
      * @param indexDatas
      * @param params+新的信号、风险、仓位模块
      * @return
@@ -58,7 +57,7 @@ public class MAStrategy implements TradingStrategy {
             // 卖出逻辑
             if (share > 0 &&
                     (params.isEnableRiskManagement() && riskRule.shouldExit(null, current) ||
-                            params.isUseComplexSignal() && signalCondition.isSellSignal(indexDatas, i, params.getSignalParams()))) {
+                            signalCondition.isSellSignal(indexDatas, i, params.getSignalParams()))) {
 
                 cash = current.getClosePoint() * share * (1 - params.getServiceCharge());
                 share = 0;
@@ -71,7 +70,7 @@ public class MAStrategy implements TradingStrategy {
 
             // 买入逻辑
             if (share == 0 &&
-                    (params.isUseComplexSignal() && signalCondition.isBuySignal(indexDatas, i, params.getSignalParams()))) {
+                (signalCondition.isBuySignal(indexDatas, i, params.getSignalParams()))) {
 
                 share = positionManager.calculatePosition(cash, current);
                 cash -= share * current.getClosePoint();

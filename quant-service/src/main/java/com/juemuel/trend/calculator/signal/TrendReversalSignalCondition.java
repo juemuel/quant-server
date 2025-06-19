@@ -1,5 +1,6 @@
 package com.juemuel.trend.calculator.signal;
 
+import cn.hutool.core.convert.Convert;
 import com.juemuel.trend.pojo.IndexData;
 import com.juemuel.trend.util.IndexDataUtil;
 import org.springframework.stereotype.Component;
@@ -12,10 +13,6 @@ import java.util.Map;
  */
 @Component("trend_reversal_signal")
 public class TrendReversalSignalCondition implements SignalCondition {
-
-    private float buyRate = 1.05f;  // 默认突破比例
-    private float sellRate = 0.95f; // 默认跌破比例
-
     @Override
     public boolean isBuySignal(List<IndexData> data, int currentIndex) {
         return false;
@@ -29,33 +26,25 @@ public class TrendReversalSignalCondition implements SignalCondition {
     @Override
     public boolean isBuySignal(List<IndexData> data, int currentIndex, Map<String, Object> signalParams) {
         if (currentIndex < 1) return false;
-        float buyRate = (float) signalParams.getOrDefault("buyRate", 1.05f);
+        float buyRate = Convert.toFloat(signalParams.getOrDefault("buyRate", "1.05"));
+        float ma = (float) signalParams.getOrDefault("ma", 20f);
 
         IndexData current = data.get(currentIndex);
         float closePoint = current.getClosePoint();
-        float avg = IndexDataUtil.getMA(currentIndex, 20, data);
+        float avg = IndexDataUtil.getMA(currentIndex, (int) ma, data);
 
         return closePoint > avg && closePoint / avg >= buyRate;
     }
     @Override
     public boolean isSellSignal(List<IndexData> data, int currentIndex, Map<String, Object> signalParams) {
         if (currentIndex < 1) return false;
-        float sellRate = (float) signalParams.getOrDefault("sellRate", 0.95f);
+        float sellRate = Convert.toFloat(signalParams.getOrDefault("sellRate", 0.95f));
+        float ma = (float) signalParams.getOrDefault("ma", 20f);
 
         IndexData current = data.get(currentIndex);
         float closePoint = current.getClosePoint();
-        float max = IndexDataUtil.getIndexDataMax(currentIndex, 20, data);
+        float max = IndexDataUtil.getIndexDataMax(currentIndex, (int) ma, data);
 
         return closePoint < max && closePoint / max <= sellRate;
-    }
-
-
-    // 支持外部配置阈值
-    public void setBuyRate(float buyRate) {
-        this.buyRate = buyRate;
-    }
-
-    public void setSellRate(float sellRate) {
-        this.sellRate = sellRate;
     }
 }

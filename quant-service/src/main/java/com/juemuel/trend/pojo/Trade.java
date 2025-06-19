@@ -12,6 +12,8 @@ public class Trade implements Serializable {
     private float sellClosePoint;
     private float rate; // 资金回报率
     //TODO：考虑补充
-    private float profitRate; // 新增：交易回报率（点位差回报率）
-    private long holdDays;    // 新增：持有天数
+    private long holdDays; // 持仓天数
+    private float profitRate; // 实际收益率
+    private float maxDrawdown; // 最大回撤
+    private float sellReason; // 卖出原因（止损、止盈、信号触发）
 }

@@ -1,7 +1,5 @@
 package com.juemuel.trend.service;
 
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.StrUtil;
 import com.juemuel.trend.calculator.position.PositionManager;
 import com.juemuel.trend.calculator.risk.RiskRule;
 import com.juemuel.trend.calculator.signal.SignalCondition;
@@ -59,27 +57,32 @@ public class BackTestService {
     /**
      * 执行完整回测逻辑，返回封装好的 Result 对象
      */
-    public Result<Map<String, Object>> simulate(StrategyParams rawParams,
-                                                List<IndexData> indexDatas,
-                                                TradingStrategy strategy) {
-        log.info("[simulate] strategyName: {}", rawParams.getStrategyName());
+    public Result<Map<String, Object>> simulate(StrategyParams strategyParams,
+                                                List<IndexData> indexDatas) {
+        log.info("[simulate] strategyName: {}", strategyParams.getStrategyName());
 
         try {
             // Step1: 获取各模块实例
-            SignalCondition signalCondition = signalContext.get(rawParams.getSignalType());
-            RiskRule riskRule = riskContext.get(rawParams.getRiskRuleType());
-            PositionManager positionManager = positionContext.get(rawParams.getPositionType());
+            SignalCondition signalCondition = signalContext.get(strategyParams.getSignalType());
+            RiskRule riskRule = riskContext.get(strategyParams.getRiskRuleType());
+            PositionManager positionManager = positionContext.get(strategyParams.getPositionType());
 
-            // Step2: 执行策略获取交易记录
-            List<Trade> trades = strategy.execute(indexDatas, rawParams, signalCondition, riskRule, positionManager);
+            // Step2: 获取策略对象（原 Controller 中的逻辑）
+            TradingStrategy strategy = strategyContext.getStrategy(strategyParams.getStrategyName());
+            if (strategy == null) {
+                return Result.error(404, "不支持的策略：" + strategyParams.getStrategyName());
+            }
 
-            // Step3: 构建指标和收益信息
+            // Step3: 执行策略
+            List<Trade> trades = strategy.execute(indexDatas, strategyParams, signalCondition, riskRule, positionManager);
+
+            // Step4: 构建响应数据
             Map<String, Object> result = new HashMap<>();
             result.put("index_info", buildIndexInfo(indexDatas));
-            result.put("strategy_info", buildStrategyInfo(strategy, rawParams));
+            result.put("strategy_info", buildStrategyInfo(strategy, strategyParams));
             result.put("trades", trades);
-            result.put("trade_stats", tradeContext.get("trade_stats").calculate(indexDatas, trades, buildStrategyParamsMap(rawParams)));
-            result.put("trade_profit", tradeContext.get("trade_profit").calculate(indexDatas, trades, buildStrategyParamsMap(rawParams)));
+            result.put("trade_stats", tradeContext.get("trade_stats").calculate(indexDatas, trades, buildStrategyParamsMap(strategyParams)));
+            result.put("trade_profit", tradeContext.get("trade_profit").calculate(indexDatas, trades, buildStrategyParamsMap(strategyParams)));
 
             return Result.success(result);
         } catch (Exception e) {
