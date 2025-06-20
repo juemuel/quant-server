@@ -21,7 +21,7 @@ public class MaCalculator implements IndicatorCalculator {
         int period = 20; // 可从配置或参数中读取
         for (int i = 0; i < indexDatas.size(); i++) {
             if (i < period) {
-                indicatorDatas.get(i).setMa(0f); // 不足周期数不计算
+                indicatorDatas.get(i).setMa(null); // 不足周期数改为null
             } else {
                 float sum = 0;
                 for (int j = i - period; j <= i; j++) {

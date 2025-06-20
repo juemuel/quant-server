@@ -51,7 +51,8 @@ public class BackTestController {
             log.warn("根据日期范围过滤后，没有可用数据");
             return Result.error(404, "指定日期范围内无数据，请调整时间范围");
         }
-        // Step3: 调用 Service 完成整个回测流程（包含策略获取+执行）
+
+        // Step3: 执行策略
         return backTestService.simulate(strategyParams, indexDatas);
 
     }

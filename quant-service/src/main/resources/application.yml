@@ -12,3 +12,7 @@ common:
     redis:
       time-to-live: 1800s  # 30分钟
 feign.hystrix.enabled: true
+strategy:
+  factor-weights:
+    ma_factor: 0.6
+    rsi_factor: 0.4

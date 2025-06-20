@@ -39,6 +39,10 @@ public class BackTestService {
     private RiskContext riskContext;
     @Autowired
     private PositionContext positionContext;
+    @Autowired
+    private IndicatorService indicatorService;
+    @Autowired
+    private FactorService factorService;
     public List<IndexData> listIndexData(String market, String code) {
         Result<List<IndexData>> response = indexDataClient.getIndexData(market, code);  // 修改这里
         if (response == null || response.getData() == null || response.getData().isEmpty()) {
@@ -63,6 +67,7 @@ public class BackTestService {
 
         try {
             // Step1: 获取各模块实例
+            // 根据信号类型获得信号条件
             SignalCondition signalCondition = signalContext.get(strategyParams.getSignalType());
             RiskRule riskRule = riskContext.get(strategyParams.getRiskRuleType());
             PositionManager positionManager = positionContext.get(strategyParams.getPositionType());
@@ -72,18 +77,31 @@ public class BackTestService {
             if (strategy == null) {
                 return Result.error(404, "不支持的策略：" + strategyParams.getStrategyName());
             }
+            // Step3: 预先计算指标和因子
+            List<IndicatorData> indicatorDatas = indicatorService.calculateIndicators(indexDatas);
+            Map<String, List<Float>> factorValues = factorService.extractFactors(indexDatas, indicatorDatas);
 
-            // Step3: 执行策略
-            List<Trade> trades = strategy.execute(indexDatas, strategyParams, signalCondition, riskRule, positionManager);
 
-            // Step4: 构建响应数据
-            Map<String, Object> result = new HashMap<>();
-            result.put("index_info", buildIndexInfo(indexDatas));
+            // Step4: 执行策略
+            List<Trade> trades = strategy.execute(
+                    indexDatas,
+                    strategyParams,
+                    signalCondition,
+                    riskRule,
+                    positionManager,
+                    indicatorDatas,
+                    factorValues
+            );
+            // Step5: 构建响应数据（我想保证顺序就用了LinkedHashMap）
+            Map<String, Object> result = new LinkedHashMap<>();
             result.put("strategy_info", buildStrategyInfo(strategy, strategyParams));
-            result.put("trades", trades);
             result.put("trade_stats", tradeContext.get("trade_stats").calculate(indexDatas, trades, buildStrategyParamsMap(strategyParams)));
             result.put("trade_profit", tradeContext.get("trade_profit").calculate(indexDatas, trades, buildStrategyParamsMap(strategyParams)));
-
+            result.put("trades", trades);
+            result.put("index_info", buildIndexInfo(indexDatas));
+            // 可选：将因子和指标也返回用于前端展示
+            result.put("indicators", indicatorDatas);
+            result.put("factors", factorValues);
             return Result.success(result);
         } catch (Exception e) {
             log.error("回测执行异常", e);

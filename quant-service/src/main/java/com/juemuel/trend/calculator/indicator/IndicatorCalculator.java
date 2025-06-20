@@ -9,6 +9,7 @@ import java.util.Map;
 
 /**
  * 指标计算器
+ * 基于原始数据（价格、成交量）通过数学计算出的技术分析工具
  */
 public interface IndicatorCalculator {
     String getName();

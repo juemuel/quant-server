@@ -27,7 +27,7 @@ public class IndexDataUtil {
     /**
      * 计算MA
      * @param currentIndex 当前索引位置
-     * @param ma 移动平均周期
+     * @param ma 移动平均周期（前端传入或默认20）
      * @param indexDatas 数据列表
      * @return 计算结果
      */

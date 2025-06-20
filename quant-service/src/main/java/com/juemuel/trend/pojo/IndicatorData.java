@@ -20,4 +20,6 @@ public class IndicatorData {
     private Float bollUpper; // 布林带上轨
     private Float bollMiddle;// 布林带中轨
     private Float bollLower; // 布林带下轨
+    // obv指标
+    private Float obv;
 }

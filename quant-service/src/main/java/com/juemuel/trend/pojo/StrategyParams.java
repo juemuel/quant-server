@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 public class StrategyParams {
@@ -39,8 +40,9 @@ public class StrategyParams {
     // TODO：策略信号，其中的策略信号会根据前端选择的测类（单因子策略、多因子策略以及自定义策略）来动态加载相关的参数，我该怎么处理控制呢？
     private String strStartDate;
     private String strEndDate;
-    private int ma;
-    private List<Integer> maPeriods; // TODO“多周期 MA
+    // signal补充字段
+    private int ma; // 存储ma
+    private List<Integer> maPeriods; // 例如[5,20,60]
     private Map<String, Object> signalParams = new HashMap<>(); // TODO: 策略信号，目前缺少signalType考虑是否固定后端判断策略类型来填写
     private Map<String, Object> extraParams = new HashMap<>();
 
@@ -112,6 +114,12 @@ public class StrategyParams {
                 "serviceCharge", "stampDutyRate", "slippageModel", "fixedSlippage",
                 "startDate", "endDate"
         ));
+        String maPeriodsStr = rawParams.get("maPeriods"); // "5,20,60"
+        if (maPeriodsStr != null && !maPeriodsStr.isEmpty()) {
+            params.setMaPeriods(Arrays.stream(maPeriodsStr.split(","))
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList()));
+        }
         for (Map.Entry<String, String> entry : rawParams.entrySet()) {
             if (!excludedKeys.contains(entry.getKey())) {
                 try {
@@ -121,9 +129,6 @@ public class StrategyParams {
                 }
             }
         }
-
-
-
         return params;
     }
 }
